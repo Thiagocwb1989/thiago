@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8" />
-  <title>Cadastro de Cliente</title>
+  <meta charset="UTF-8">
+  <title>Cadastro de Cliente - PoupyAI</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
     body {
       font-family: Arial, sans-serif;
-      background: #f0f4f8;
+      background-color: #f0f4f8;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -14,46 +17,67 @@
       margin: 0;
     }
     .container {
-      background: white;
-      padding: 20px;
+      background: #fff;
+      padding: 2rem;
       border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      max-width: 400px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
       width: 100%;
+      max-width: 400px;
     }
     h1 {
       text-align: center;
       color: #175197;
     }
-    label {
+    form label {
       display: block;
-      margin-top: 10px;
+      margin-bottom: 1rem;
     }
-    input {
+    form input {
       width: 100%;
-      padding: 8px;
-      margin-top: 5px;
+      padding: 0.5rem;
+      margin-top: 0.25rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
     }
     button {
-      margin-top: 20px;
-      padding: 10px;
       width: 100%;
+      padding: 0.75rem;
       background-color: #175197;
       color: white;
       border: none;
       border-radius: 4px;
+      font-size: 1rem;
       cursor: pointer;
+    }
+    button:hover {
+      background-color: #143d78;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Cadastro de Cliente</h1>
-    <form id="form">
-      <label>Nome: <input type="text" name="nome" required /></label>
-      <label>WhatsApp: <input type="text" name="whatsapp" required /></label>
-      <label>Plano: <input type="text" name="plano" required /></label>
-      <label>Vencimento: <input type="date" name="vencimento" required /></label>
+    <form id="clienteForm">
+      <label>
+        Nome:
+        <input type="text" name="nome" required>
+      </label>
+
+      <label>
+        WhatsApp:
+        <input type="text" name="whatsapp" required>
+      </label>
+
+      <label>
+        Plano:
+        <input type="text" name="plano" required>
+      </label>
+
+      <label>
+        Vencimento:
+        <input type="date" name="vencimento" required>
+      </label>
+
       <button type="submit">Salvar</button>
     </form>
   </div>
@@ -61,15 +85,15 @@
   <script src="https://unpkg.com/@supabase/supabase-js"></script>
   <script>
     const supabase = supabase.createClient(
-      'https://mrmfxzojroxyqaelsraj.supabase.co', // ✅ Substitua com sua URL
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ybWZ4em9qcm94eXFhZWxzcmFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIyNzEyNTEsImV4cCI6MjA2Nzg0NzI1MX0.TRSmNcf7Cxo11UQx1Jvo4LOU5yE38f8NCMXEf927KsM' // ✅ Substitua com sua anon key
+      'https://mrmfxzojroxyqaelsraj.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ybWZ4em9qcm94eXFhZWxzcmFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIyNzEyNTEsImV4cCI6MjA2Nzg0NzI1MX0.TRSmNcf7Cxo11UQx1Jvo4LOU5yE38f8NCMXEf927KsM'
     );
 
-    const form = document.getElementById('form');
+    const form = document.getElementById('clienteForm');
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const data = new FormData(form);
-
       const cliente = {
         nome: data.get('nome'),
         whatsapp: data.get('whatsapp'),
@@ -77,10 +101,12 @@
         vencimento: data.get('vencimento')
       };
 
-      const { error } = await supabase.from('clientes').insert([cliente]);
+      const { error } = await supabase
+        .from('clientes')
+        .insert([cliente]);
 
       if (error) {
-        alert('Erro: ' + error.message);
+        alert('Erro ao salvar: ' + error.message);
       } else {
         alert('Cliente cadastrado com sucesso!');
         form.reset();
