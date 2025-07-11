@@ -4,9 +4,6 @@
   <meta charset="UTF-8">
   <title>Cadastro de Cliente - PoupyAI</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
     body {
       font-family: Arial, sans-serif;
       background-color: #f0f4f8;
@@ -16,6 +13,7 @@
       height: 100vh;
       margin: 0;
     }
+
     .container {
       background: #fff;
       padding: 2rem;
@@ -24,21 +22,25 @@
       width: 100%;
       max-width: 400px;
     }
+
     h1 {
       text-align: center;
       color: #175197;
     }
-    form label {
+
+    label {
       display: block;
       margin-bottom: 1rem;
     }
-    form input {
+
+    input, select {
       width: 100%;
       padding: 0.5rem;
       margin-top: 0.25rem;
       border: 1px solid #ccc;
       border-radius: 4px;
     }
+
     button {
       width: 100%;
       padding: 0.75rem;
@@ -49,8 +51,14 @@
       font-size: 1rem;
       cursor: pointer;
     }
+
     button:hover {
       background-color: #143d78;
+    }
+
+    .link {
+      text-align: center;
+      margin-top: 1rem;
     }
   </style>
 </head>
@@ -62,55 +70,64 @@
         Nome:
         <input type="text" name="nome" required>
       </label>
-
       <label>
-        WhatsApp:
-        <input type="text" name="whatsapp" required>
+        Telefone:
+        <input type="text" name="telefone" required>
       </label>
-
       <label>
-        Plano:
-        <input type="text" name="plano" required>
+        Lista:
+        <input type="text" name="lista" required>
       </label>
-
+      <label>
+        Servidor:
+        <select name="servidor" required>
+          <option value="">Selecione...</option>
+          <option value="NOW">NOW</option>
+          <option value="STREAMLY">STREAMLY</option>
+          <option value="NEXT">NEXT</option>
+          <option value="BLADE">BLADE</option>
+          <option value="TOP">TOP</option>
+          <option value="UNITV">UNITV</option>
+        </select>
+      </label>
       <label>
         Vencimento:
         <input type="date" name="vencimento" required>
       </label>
-
       <button type="submit">Salvar</button>
     </form>
+    <div class="link">
+      <a href="clientes.html">Ver Clientes</a>
+    </div>
   </div>
-  
-  <script type="module">
-  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-  const supabase = createClient(
-    "https://mrmfxzojroxyqaelsraj.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ybWZ4em9qcm94eXFhZWxzcmFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIyNzEyNTEsImV4cCI6MjA2Nzg0NzI1MX0.TRSmNcf7Cxo11UQx1Jvo4LOU5yE38f8NCMXEf927KsM"
-  );
+  <script src="https://unpkg.com/@supabase/supabase-js"></script>
+  <script>
+    const supabase = supabase.createClient(
+      'https://mrmfxzojroxyqaelsraj.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ybWZ4em9qcm94eXFhZWxzcmFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIyNzEyNTEsImV4cCI6MjA2Nzg0NzI1MX0.TRSmNcf7Cxo11UQx1Jvo4LOU5yE38f8NCMXEf927KsM'
+    );
 
-  const form = document.getElementById("clienteForm");
+    const form = document.getElementById('clienteForm');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = new FormData(form);
+      const cliente = {
+        nome: data.get('nome'),
+        telefone: data.get('telefone'),
+        lista: data.get('lista'),
+        servidor: data.get('servidor'),
+        vencimento: data.get('vencimento'),
+      };
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const data = new FormData(form);
-    const cliente = {
-      nome: data.get("nome"),
-      whatsapp: data.get("whatsapp"),
-      plano: data.get("plano"),
-      vencimento: data.get("vencimento"),
-    };
-
-    const { error } = await supabase.from("clientes").insert([cliente]);
-
-    if (error) {
-      alert("Erro ao salvar: " + error.message);
-    } else {
-      alert("Cliente cadastrado com sucesso!");
-      form.reset();
-    }
-  });
-</script>
+      const { error } = await supabase.from('clientes').insert([cliente]);
+      if (error) {
+        alert('Erro ao salvar: ' + error.message);
+      } else {
+        alert('Cliente cadastrado com sucesso!');
+        window.location.href = 'clientes.html';
+      }
+    });
+  </script>
 </body>
 </html>
