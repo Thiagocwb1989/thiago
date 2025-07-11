@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Clientes - PoupyAI</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f8;
+      margin: 0;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #175197;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    button {
+      padding: 0.4rem 0.8rem;
+      background-color: #175197;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #143d78;
+    }
+
+    .edit-input {
+      width: 90%;
+      padding: 0.3rem;
+      font-size: 0.9rem;
+    }
+
+    .edit-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Clientes Cadastrados</h1>
+    <input type="text" id="filtro" placeholder="Filtrar por nome ou telefone..." />
+
+    <table id="tabelaClientes">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Telefone</th>
+          <th>Lista</th>
+          <th>Servidor</th>
+          <th>Vencimento</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Dados serão inseridos via JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <script src="https://unpkg.com/@supabase/supabase-js"></script>
+  <script>
+    const supabase = supabase.createClient(
+      'https://YOUR_SUPABASE_URL.supabase.co',
+      'YOUR_SUPABASE_ANON_KEY'
+    );
+
+    const tabela = document.getElementById('tabelaClientes').querySelector('tbody');
+    const filtro = document.getElementById('filtro');
+    let clientesOriginais = [];
+
+    async function carregarClientes() {
+      const { data, error } = await supabase.from('clientes').select('*');
+      if (error) {
+        alert('Erro ao carregar clientes: ' + error.message);
+        return;
+      }
+      clientesOriginais = data;
+      mostrarClientes(data);
+    }
+
+    function mostrarClientes(clientes) {
+      tabela.innerHTML = '';
+      clientes.forEach(cliente => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><input class="edit-input" value="${cliente.nome}" data-id="${cliente.id}" data-campo="nome"></td>
+          <td><input class="edit-input" value="${cliente.telefone}" data-id="${cliente.id}" data-campo="telefone"></td>
+          <td><input class="edit-input" value="${cliente.lista}" data-id="${cliente.id}" data-campo="lista"></td>
+          <td>
+            <select class="edit-input" data-id="${cliente.id}" data-campo="servidor">
+              ${['NOW', 'STREAMLY', 'NEXT', 'BLADE', 'TOP', 'UNITV'].map(op =>
+                `<option value="${op}" ${cliente.servidor === op ? 'selected' : ''}>${op}</option>`
+              ).join('')}
+            </select>
+          </td>
+          <td><input class="edit-input" type="date" value="${cliente.vencimento}" data-id="${cliente.id}" data-campo="vencimento"></td>
+          <td class="edit-actions">
+            <button onclick="salvarEdicao(${cliente.id})">Salvar</button>
+          </td>
+        `;
+        tabela.appendChild(tr);
+      });
+    }
+
+    async function salvarEdicao(id) {
+      const inputs = document.querySelectorAll(`[data-id="${id}"]`);
+      const dadosAtualizados = {};
+      inputs.forEach(input => {
+        dadosAtualizados[input.getAttribute('data-campo')] = input.value;
+      });
+
+      const { error } = await supabase
+        .from('clientes')
+        .update(dadosAtualizados)
+        .eq('id', id);
+
+      if (error) {
+        alert('Erro ao salvar: ' + error.message);
+      } else {
+        alert('Cliente atualizado com sucesso!');
+        carregarClientes();
+      }
+    }
+
+    filtro.addEventListener('input', () => {
+      const termo = filtro.value.toLowerCase();
+      const filtrados = clientesOriginais.filter(cliente =>
+        cliente.nome.toLowerCase().includes(termo) ||
+        cliente.telefone.toLowerCase().includes(termo)
+      );
+      mostrarClientes(filtrados);
+    });
+
+    carregarClientes();
+  </script>
+</body>
+</html>
