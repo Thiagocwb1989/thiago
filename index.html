@@ -82,38 +82,41 @@
     </form>
   </div>
 
-  <script src="https://unpkg.com/@supabase/supabase-js"></script>
-  <script>
-    const supabaseUrl = 'https://mrmfxzojroxyqaelsraj.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ybWZ4em9qcm94eXFhZWxzcmFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIyNzEyNTEsImV4cCI6MjA2Nzg0NzI1MX0.TRSmNcf7Cxo11UQx1Jvo4LOU5yE38f8NCMXEf927KsM';
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const supabaseUrl = 'https://mrmfxzojroxyqaelsraj.supabase.co';
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ybWZ4em9qcm94eXFhZWxzcmFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIyNzEyNTEsImV4cCI6MjA2Nzg0NzI1MX0.TRSmNcf7Cxo11UQx1Jvo4LOU5yE38f8NCMXEf927KsM';
 
-    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+  const { createClient } = supabase;
+  const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
-    const form = document.getElementById('clienteForm');
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
+  const form = document.getElementById('clienteForm');
 
-      const data = new FormData(form);
-      const cliente = {
-        nome: data.get('nome'),
-        telefone: data.get('telefone'),
-        lista: data.get('lista'),
-        servidor: data.get('servidor'),
-        vencimento: data.get('vencimento')
-      };
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-      const { data: inserted, error } = await supabase
-        .from('clientes')
-        .insert([cliente]);
+    const data = new FormData(form);
+    const cliente = {
+      nome: data.get('nome'),
+      telefone: data.get('telefone'),
+      lista: data.get('lista'),
+      servidor: data.get('servidor'),
+      vencimento: data.get('vencimento')
+    };
 
-      if (error) {
-        alert('Erro ao salvar: ' + error.message);
-        console.error(error);
-      } else {
-        alert('Cliente cadastrado com sucesso!');
-        form.reset();
-      }
-    });
-  </script>
+    const { error } = await supabaseClient
+      .from('clientes')
+      .insert([cliente]);
+
+    if (error) {
+      alert('Erro ao salvar: ' + error.message);
+      console.error(error);
+    } else {
+      alert('Cliente cadastrado com sucesso!');
+      form.reset();
+    }
+  });
+</script>
+
 </body>
 </html>
