@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <title>Clientes - PoupyAI</title>
   <style>
+    <script>
+  if (localStorage.getItem('logado') !== 'true') {
+    window.location.href = 'login.html';
+  }
+</script>
+
   body {
     font-family: Arial, sans-serif;
     background-color: #eef2f5;
