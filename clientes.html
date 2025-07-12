@@ -192,15 +192,16 @@
     function filtrarClientes() {
   const termo = document.getElementById('filtro-unico').value.trim().toLowerCase();
 
-  const isData = /^\d{2}\/\d{2}$/.test(termo); // só dia/mês
+  const isData = /^\d{2}\/\d{2}$/.test(termo); // detecta formato 24/07
 
   const filtrados = todosClientes.filter(cliente => {
-    const vencimentoOriginal = cliente.vencimento; // formato YYYY-MM-DD
-    const [ano, mes, dia] = vencimentoOriginal.split('-');
-    const vencimentoFormatado = `${dia}/${mes}`;
+    const venc = new Date(cliente.vencimento);
+    const dia = String(venc.getUTCDate()).padStart(2, '0');
+    const mes = String(venc.getUTCMonth() + 1).padStart(2, '0');
+    const dataFormatada = `${dia}/${mes}`; // ex: 24/07
 
     if (isData) {
-      return vencimentoFormatado === termo;
+      return dataFormatada === termo;
     } else {
       return (
         cliente.nome.toLowerCase().includes(termo) ||
@@ -213,8 +214,6 @@
 
   renderClientes(filtrados);
 }
-
-
     carregarClientes();
   </script>
 </body>
