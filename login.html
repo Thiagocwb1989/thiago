@@ -3,29 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <title>Login - PoupyAI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f0f4f8;
+      background: linear-gradient(to right, #175197, #1e73be);
+      height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      margin: 0;
     }
 
     .login-container {
-      background: white;
-      padding: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      background: #ffffff;
+      padding: 2.5rem 2rem;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
       width: 100%;
       max-width: 400px;
     }
 
-    h1 {
+    .login-container h1 {
       text-align: center;
+      margin-bottom: 1.5rem;
       color: #175197;
+      font-weight: 600;
     }
 
     input {
@@ -33,7 +41,15 @@
       padding: 0.75rem;
       margin-top: 1rem;
       border: 1px solid #ccc;
-      border-radius: 5px;
+      border-radius: 8px;
+      transition: 0.3s;
+      font-size: 1rem;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #175197;
+      box-shadow: 0 0 0 2px rgba(23, 81, 151, 0.2);
     }
 
     button {
@@ -43,9 +59,11 @@
       background-color: #175197;
       color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 8px;
       font-size: 1rem;
+      font-weight: 500;
       cursor: pointer;
+      transition: background-color 0.3s;
     }
 
     button:hover {
@@ -53,22 +71,23 @@
     }
 
     .error {
-      color: red;
+      color: #d9534f;
       text-align: center;
       margin-top: 1rem;
+      font-size: 0.95rem;
     }
   </style>
 </head>
 <body>
   <div class="login-container">
     <h1>Login</h1>
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="senha" placeholder="Senha">
+    <input type="email" id="email" placeholder="Email" autocomplete="username" />
+    <input type="password" id="senha" placeholder="Senha" autocomplete="current-password" />
     <button onclick="login()">Entrar</button>
     <div id="erro" class="error"></div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const { createClient } = supabase;
     const supabaseClient = createClient(
@@ -90,7 +109,7 @@
         erroDiv.textContent = 'Email ou senha incorretos.';
       } else {
         localStorage.setItem('logado', 'true');
-        window.location.href = 'index.html';
+        window.location.href = 'clientes.html';
       }
     }
   </script>
