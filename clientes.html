@@ -189,7 +189,7 @@
 <body>
   <h1>Lista de Clientes</h1>
   <div class="filtro-container">
-    <input type="text" id="filtro-unico" placeholder="Buscar por nome, telefone, lista, servidor ou data (DD/MM)">
+    <input type="text" id="filtro-unico" placeholder="Buscar por nome, telefone, lista, servidor ou data (DD/MM)" oninput="filtrarClientes()">
     <div class="botoes-topo">
       <a href="index.html" class="btn-voltar">Voltar ao Cadastro</a>
       <button onclick="logout()" class="btn-logout">Logout</button>
