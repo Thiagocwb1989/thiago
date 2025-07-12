@@ -5,85 +5,62 @@
   <title>Login - PoupyAI</title>
   <style>
     body {
-      background-color: #eef2f5;
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      font-family: Arial, sans-serif;
     }
-
-    .login-container {
-      background: #fff;
+    .login-box {
+      background: white;
       padding: 2rem;
       border-radius: 8px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      width: 100%;
-      max-width: 400px;
     }
-
-    h1 {
-      text-align: center;
-      color: #175197;
-      margin-bottom: 1rem;
-    }
-
     input {
+      display: block;
+      margin-bottom: 1rem;
       width: 100%;
-      padding: 0.7rem;
-      margin: 0.5rem 0;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+      padding: 0.5rem;
     }
-
     button {
       width: 100%;
-      padding: 0.7rem;
+      padding: 0.75rem;
       background-color: #175197;
       color: white;
       border: none;
       border-radius: 4px;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #143d78;
-    }
-
-    .erro {
-      color: red;
-      text-align: center;
-      margin-top: 1rem;
     }
   </style>
 </head>
 <body>
-  <div class="login-container">
-    <h1>Login</h1>
-    <input type="text" id="usuario" placeholder="Usuário">
-    <input type="password" id="senha" placeholder="Senha">
-    <button onclick="fazerLogin()">Entrar</button>
-    <div id="erro" class="erro"></div>
+  <div class="login-box">
+    <h2>Login</h2>
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="password" id="senha" placeholder="Senha" required />
+    <button onclick="login()">Entrar</button>
   </div>
 
+  <script src="https://unpkg.com/@supabase/supabase-js"></script>
   <script>
-    function fazerLogin() {
-      const usuario = document.getElementById('usuario').value;
+    const supabase = supabase.createClient(
+      'https://mrmfxzojroxyqaelsraj.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+    );
+
+    async function login() {
+      const email = document.getElementById('email').value;
       const senha = document.getElementById('senha').value;
 
-      // Dados fixos de exemplo
-      if (usuario === 'admin' && senha === '1234') {
-        localStorage.setItem('logado', 'true');
-        window.location.href = 'index.html';
-      } else {
-        document.getElementById('erro').textContent = 'Usuário ou senha incorretos';
-      }
-    }
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password: senha });
 
-    // Se já estiver logado, redireciona direto
-    if (localStorage.getItem('logado') === 'true') {
-      window.location.href = 'index.html';
+      if (error) {
+        alert('Erro ao logar: ' + error.message);
+      } else {
+        localStorage.setItem('token', data.session.access_token);
+        window.location.href = 'index.html';
+      }
     }
   </script>
 </body>
