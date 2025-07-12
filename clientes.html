@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Clientes - PoupyAI</title>
   <style>
     * {
@@ -18,7 +18,7 @@
     h1 {
       text-align: center;
       color: #123c69;
-      font-size: 2rem;
+      font-size: 2.2rem;
       margin-bottom: 2.5rem;
     }
 
@@ -26,16 +26,30 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 10px;
+      flex-wrap: wrap;
+      gap: 12px;
       margin-bottom: 2rem;
     }
 
-    .filtro-unico input {
-      width: 400px;
+    .filtro-unico input[type="text"] {
+      width: 320px;
       padding: 0.6rem;
       font-size: 1rem;
       border: 1px solid #ccc;
       border-radius: 8px;
+    }
+
+    .filtro-unico label {
+      font-size: 0.95rem;
+      color: #333;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .filtro-unico input[type="checkbox"] {
+      transform: scale(1.2);
+      cursor: pointer;
     }
 
     .botoes-topo {
@@ -206,7 +220,8 @@
   <h1>Lista de Clientes</h1>
 
   <div class="filtro-unico">
-    <input type="text" id="filtro-unico" placeholder="Buscar por nome, telefone, servidor ou data (12/07/2025)" oninput="filtrarClientes()">
+    <input type="text" id="filtro-unico" placeholder="Buscar por nome, telefone, servidor ou data" oninput="filtrarClientes()" />
+    <label><input type="checkbox" id="filtro-vencidos" onchange="filtrarClientes()" /> Mostrar apenas vencidos</label>
   </div>
 
   <div class="botoes-topo">
@@ -234,16 +249,17 @@
     <button onclick="proximaPagina()">Próximo</button>
   </div>
 
+  <!-- Modal de Edição -->
   <div id="modal-editar">
     <div class="modal-conteudo">
       <h3>Editar Cliente</h3>
-      <input type="hidden" id="editar-id">
+      <input type="hidden" id="editar-id" />
       <label>Nome:</label>
-      <input type="text" id="editar-nome">
+      <input type="text" id="editar-nome" />
       <label>Telefone:</label>
-      <input type="text" id="editar-telefone">
+      <input type="text" id="editar-telefone" />
       <label>Lista:</label>
-      <input type="text" id="editar-lista">
+      <input type="text" id="editar-lista" />
       <label>Servidor:</label>
       <select id="editar-servidor">
         <option value="NOW">NOW</option>
@@ -254,7 +270,7 @@
         <option value="UNITV">UNITV</option>
       </select>
       <label>Vencimento:</label>
-      <input type="date" id="editar-vencimento">
+      <input type="date" id="editar-vencimento" />
       <div style="text-align: right; margin-top: 10px;">
         <button onclick="fecharModal()">Cancelar</button>
         <button onclick="salvarEdicao()">Salvar</button>
@@ -266,7 +282,7 @@
   <script>
     const supabase = window.supabase.createClient(
       'https://mrmfxzojroxyqaelsraj.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ybWZ4em9qcm94eXFhZWxzcmFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIyNzEyNTEsImV4cCI6MjA2Nzg0NzI1MX0.TRSmNcf7Cxo11UQx1Jvo4LOU5yE38f8NCMXEf927KsM'
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
     );
 
     let todosClientes = [];
@@ -281,9 +297,7 @@
         return;
       }
       todosClientes = data;
-      clientesFiltrados = data;
-      paginaAtual = 1;
-      renderClientes();
+      filtrarClientes();
     }
 
     function isExpirado(vencimento) {
@@ -295,6 +309,28 @@
     function formatarData(data) {
       const [ano, mes, dia] = data.split('-');
       return `${dia}/${mes}/${ano}`;
+    }
+
+    function filtrarClientes() {
+      const termo = document.getElementById('filtro-unico').value.trim().toLowerCase();
+      const mostrarVencidos = document.getElementById('filtro-vencidos').checked;
+
+      clientesFiltrados = todosClientes.filter(cliente => {
+        const vencBR = formatarData(cliente.vencimento).toLowerCase();
+        const ehVencido = isExpirado(cliente.vencimento);
+
+        const corresponde =
+          cliente.nome.toLowerCase().includes(termo) ||
+          cliente.telefone.toLowerCase().includes(termo) ||
+          cliente.lista.toLowerCase().includes(termo) ||
+          cliente.servidor.toLowerCase().includes(termo) ||
+          vencBR.includes(termo);
+
+        return corresponde && (!mostrarVencidos || ehVencido);
+      });
+
+      paginaAtual = 1;
+      renderClientes();
     }
 
     function renderClientes() {
@@ -356,22 +392,6 @@
           carregarClientes();
         }
       }
-    }
-
-    function filtrarClientes() {
-      const termo = document.getElementById('filtro-unico').value.trim().toLowerCase();
-      clientesFiltrados = todosClientes.filter(cliente => {
-        const vencBR = formatarData(cliente.vencimento).toLowerCase();
-        return (
-          cliente.nome.toLowerCase().includes(termo) ||
-          cliente.telefone.toLowerCase().includes(termo) ||
-          cliente.lista.toLowerCase().includes(termo) ||
-          cliente.servidor.toLowerCase().includes(termo) ||
-          vencBR.includes(termo)
-        );
-      });
-      paginaAtual = 1;
-      renderClientes();
     }
 
     function abrirModal(id) {
