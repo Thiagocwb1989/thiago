@@ -183,116 +183,153 @@
   <button onclick="proximaPagina()" id="btn-proximo">Próximo</button>
 </div>
 
-  <script src="https://unpkg.com/@supabase/supabase-js"></script>
   <script>
-    const supabase = window.supabase.createClient(
-      'https://mrmfxzojroxyqaelsraj.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ybWZ4em9qcm94eXFhZWxzcmFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIyNzEyNTEsImV4cCI6MjA2Nzg0NzI1MX0.TRSmNcf7Cxo11UQx1Jvo4LOU5yE38f8NCMXEf927KsM'
-    );
+  const supabase = window.supabase.createClient(
+    'https://mrmfxzojroxyqaelsraj.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ybWZ4em9qcm94eXFhZWxzcmFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIyNzEyNTEsImV4cCI6MjA2Nzg0NzI1MX0.TRSmNcf7Cxo11UQx1Jvo4LOU5yE38f8NCMXEf927KsM'
+  );
 
-    let todosClientes = [];
+  let todosClientes = [];
+  let clientesFiltrados = [];
+  let paginaAtual = 1;
+  const porPagina = 10;
 
-    async function carregarClientes() {
-      const { data, error } = await supabase.from('clientes').select('*');
-      if (error) {
-        alert('Erro ao buscar clientes: ' + error.message);
-        return;
-      }
-      todosClientes = data;
-      renderClientes(data);
+  async function carregarClientes() {
+    const { data, error } = await supabase.from('clientes').select('*');
+    if (error) {
+      alert('Erro ao buscar clientes: ' + error.message);
+      return;
     }
+    todosClientes = data;
+    clientesFiltrados = todosClientes;
+    paginaAtual = 1;
+    renderClientesPaginado();
+  }
 
-    function renderClientes(clientes) {
-      const tabela = document.getElementById('tabela-clientes');
-      tabela.innerHTML = '';
+  function renderClientesPaginado() {
+    const inicio = (paginaAtual - 1) * porPagina;
+    const fim = inicio + porPagina;
+    const clientesPagina = clientesFiltrados.slice(inicio, fim);
 
-      clientes.forEach(cliente => {
-        const linha = document.createElement('tr');
-        linha.innerHTML = `
-          <td data-label="Nome"><input type="text" value="${cliente.nome}" id="nome-${cliente.id}"></td>
-          <td data-label="Telefone"><input type="text" value="${cliente.telefone}" id="telefone-${cliente.id}"></td>
-          <td data-label="Lista"><input type="text" value="${cliente.lista}" id="lista-${cliente.id}"></td>
-          <td data-label="Servidor">
-            <select id="servidor-${cliente.id}">
-              ${['NOW','STREAMLY','NEXT','BLADE','TOP','UNITV'].map(opcao => `
-                <option value="${opcao}" ${cliente.servidor === opcao ? 'selected' : ''}>${opcao}</option>
-              `).join('')}
-            </select>
-          </td>
-          <td data-label="Vencimento"><input type="date" value="${cliente.vencimento}" id="vencimento-${cliente.id}"></td>
-          <td class="botoes">
-            <button class="salvar" onclick="salvar('${cliente.id}')">Salvar</button>
-            <button class="deletar" onclick="deletar('${cliente.id}')">Deletar</button>
-          </td>
-        `;
-        tabela.appendChild(linha);
-      });
+    renderClientes(clientesPagina);
+    atualizarPaginacao();
+  }
+
+  function atualizarPaginacao() {
+    const totalPaginas = Math.ceil(clientesFiltrados.length / porPagina);
+    document.getElementById('indicador-pagina').textContent = `Página ${paginaAtual} de ${totalPaginas}`;
+
+    document.getElementById('btn-anterior').disabled = paginaAtual === 1;
+    document.getElementById('btn-proximo').disabled = paginaAtual === totalPaginas || totalPaginas === 0;
+  }
+
+  function paginaAnterior() {
+    if (paginaAtual > 1) {
+      paginaAtual--;
+      renderClientesPaginado();
     }
+  }
 
-    async function salvar(id) {
-      const clienteAtualizado = {
-        nome: document.getElementById(`nome-${id}`).value,
-        telefone: document.getElementById(`telefone-${id}`).value,
-        lista: document.getElementById(`lista-${id}`).value,
-        servidor: document.getElementById(`servidor-${id}`).value,
-        vencimento: document.getElementById(`vencimento-${id}`).value
-      };
+  function proximaPagina() {
+    const totalPaginas = Math.ceil(clientesFiltrados.length / porPagina);
+    if (paginaAtual < totalPaginas) {
+      paginaAtual++;
+      renderClientesPaginado();
+    }
+  }
 
+  function renderClientes(clientes) {
+    const tabela = document.getElementById('tabela-clientes');
+    tabela.innerHTML = '';
+
+    clientes.forEach(cliente => {
+      const linha = document.createElement('tr');
+      linha.innerHTML = `
+        <td data-label="Nome"><input type="text" value="${cliente.nome}" id="nome-${cliente.id}"></td>
+        <td data-label="Telefone"><input type="text" value="${cliente.telefone}" id="telefone-${cliente.id}"></td>
+        <td data-label="Lista"><input type="text" value="${cliente.lista}" id="lista-${cliente.id}"></td>
+        <td data-label="Servidor">
+          <select id="servidor-${cliente.id}">
+            ${['NOW','STREAMLY','NEXT','BLADE','TOP','UNITV'].map(opcao => `
+              <option value="${opcao}" ${cliente.servidor === opcao ? 'selected' : ''}>${opcao}</option>
+            `).join('')}
+          </select>
+        </td>
+        <td data-label="Vencimento"><input type="date" value="${cliente.vencimento}" id="vencimento-${cliente.id}"></td>
+        <td class="botoes">
+          <button class="salvar" onclick="salvar('${cliente.id}')">Salvar</button>
+          <button class="deletar" onclick="deletar('${cliente.id}')">Deletar</button>
+        </td>
+      `;
+      tabela.appendChild(linha);
+    });
+  }
+
+  async function salvar(id) {
+    const clienteAtualizado = {
+      nome: document.getElementById(`nome-${id}`).value,
+      telefone: document.getElementById(`telefone-${id}`).value,
+      lista: document.getElementById(`lista-${id}`).value,
+      servidor: document.getElementById(`servidor-${id}`).value,
+      vencimento: document.getElementById(`vencimento-${id}`).value
+    };
+
+    const { error } = await supabase
+      .from('clientes')
+      .update(clienteAtualizado)
+      .eq('id', id);
+
+    if (error) {
+      alert('Erro ao salvar: ' + error.message);
+    } else {
+      alert('Cliente salvo com sucesso!');
+      carregarClientes();
+    }
+  }
+
+  async function deletar(id) {
+    if (confirm('Tem certeza que deseja deletar este cliente?')) {
       const { error } = await supabase
         .from('clientes')
-        .update(clienteAtualizado)
+        .delete()
         .eq('id', id);
 
       if (error) {
-        alert('Erro ao salvar: ' + error.message);
+        alert('Erro ao deletar: ' + error.message);
       } else {
-        alert('Cliente salvo com sucesso!');
+        alert('Cliente deletado com sucesso!');
         carregarClientes();
       }
     }
+  }
 
-    async function deletar(id) {
-      if (confirm('Tem certeza que deseja deletar este cliente?')) {
-        const { error } = await supabase
-          .from('clientes')
-          .delete()
-          .eq('id', id);
+  function filtrarClientes() {
+    const termo = document.getElementById('filtro-unico').value.trim().toLowerCase();
+    const isData = /^\d{2}\/\d{2}$/.test(termo);
 
-        if (error) {
-          alert('Erro ao deletar: ' + error.message);
-        } else {
-          alert('Cliente deletado com sucesso!');
-          carregarClientes();
-        }
+    clientesFiltrados = todosClientes.filter(cliente => {
+      const venc = new Date(cliente.vencimento);
+      const dia = String(venc.getUTCDate()).padStart(2, '0');
+      const mes = String(venc.getUTCMonth() + 1).padStart(2, '0');
+      const dataFormatada = `${dia}/${mes}`;
+
+      if (isData) {
+        return dataFormatada === termo;
+      } else {
+        return (
+          cliente.nome.toLowerCase().includes(termo) ||
+          cliente.telefone.toLowerCase().includes(termo) ||
+          cliente.lista.toLowerCase().includes(termo) ||
+          cliente.servidor.toLowerCase().includes(termo)
+        );
       }
-    }
+    });
 
-    function filtrarClientes() {
-      const termo = document.getElementById('filtro-unico').value.trim().toLowerCase();
-      const isData = /^\d{2}\/\d{2}$/.test(termo);
+    paginaAtual = 1;
+    renderClientesPaginado();
+  }
 
-      const filtrados = todosClientes.filter(cliente => {
-        const venc = new Date(cliente.vencimento);
-        const dia = String(venc.getUTCDate()).padStart(2, '0');
-        const mes = String(venc.getUTCMonth() + 1).padStart(2, '0');
-        const dataFormatada = `${dia}/${mes}`;
-
-        if (isData) {
-          return dataFormatada === termo;
-        } else {
-          return (
-            cliente.nome.toLowerCase().includes(termo) ||
-            cliente.telefone.toLowerCase().includes(termo) ||
-            cliente.lista.toLowerCase().includes(termo) ||
-            cliente.servidor.toLowerCase().includes(termo)
-          );
-        }
-      });
-
-      renderClientes(filtrados);
-    }
-
-    carregarClientes();
-  </script>
+  carregarClientes();
+</script>
 </body>
 </html>
