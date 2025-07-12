@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Clientes - PoupyAI</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f9f9f9;
-      margin: 0;
-      padding: 20px;
+      margin: 20px;
+      background-color: #f0f0f0;
     }
 
     h1 {
@@ -18,22 +17,24 @@
 
     #filtro {
       display: block;
-      margin: 20px auto;
-      padding: 10px;
-      width: 100%;
-      max-width: 400px;
+      margin: 10px auto 20px;
+      padding: 8px;
+      width: 300px;
       border: 1px solid #ccc;
       border-radius: 4px;
     }
 
     table {
       width: 100%;
+      max-width: 1000px;
+      margin: auto;
       border-collapse: collapse;
-      margin-top: 20px;
+      background: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
 
     th, td {
-      padding: 12px;
+      padding: 8px;
       border: 1px solid #ccc;
       text-align: center;
     }
@@ -43,11 +44,18 @@
       color: white;
     }
 
+    input[type="text"], input[type="date"] {
+      width: 100%;
+      padding: 4px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
     button {
       background-color: #175197;
       color: white;
       border: none;
-      padding: 6px 12px;
+      padding: 5px 10px;
       border-radius: 4px;
       cursor: pointer;
     }
@@ -59,10 +67,9 @@
 </head>
 <body>
   <h1>Clientes Cadastrados</h1>
-
   <input type="text" id="filtro" placeholder="Filtrar por nome...">
 
-  <table id="tabela">
+  <table>
     <thead>
       <tr>
         <th>Nome</th>
@@ -73,9 +80,7 @@
         <th>Ação</th>
       </tr>
     </thead>
-    <tbody id="corpoTabela">
-      <!-- Dados vão aqui -->
-    </tbody>
+    <tbody id="corpoTabela"></tbody>
   </table>
 
   <script src="https://unpkg.com/@supabase/supabase-js"></script>
@@ -97,22 +102,27 @@
 
       const { data, error } = await query;
 
+      corpoTabela.innerHTML = '';
+
       if (error) {
-        alert('Erro ao buscar clientes: ' + error.message);
+        corpoTabela.innerHTML = `<tr><td colspan="6">Erro: ${error.message}</td></tr>`;
         return;
       }
 
-      corpoTabela.innerHTML = '';
+      if (data.length === 0) {
+        corpoTabela.innerHTML = `<tr><td colspan="6">Nenhum cliente encontrado.</td></tr>`;
+        return;
+      }
 
-      data.forEach(cliente => {
+      data.forEach(c => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td><input type="text" value="${cliente.nome}" id="nome-${cliente.id}"></td>
-          <td><input type="text" value="${cliente.telefone}" id="telefone-${cliente.id}"></td>
-          <td><input type="text" value="${cliente.lista}" id="lista-${cliente.id}"></td>
-          <td><input type="text" value="${cliente.servidor}" id="servidor-${cliente.id}"></td>
-          <td><input type="date" value="${cliente.vencimento}" id="vencimento-${cliente.id}"></td>
-          <td><button onclick="salvar(${cliente.id})">Salvar</button></td>
+          <td><input type="text" id="nome-${c.id}" value="${c.nome}"></td>
+          <td><input type="text" id="telefone-${c.id}" value="${c.telefone}"></td>
+          <td><input type="text" id="lista-${c.id}" value="${c.lista}"></td>
+          <td><input type="text" id="servidor-${c.id}" value="${c.servidor}"></td>
+          <td><input type="date" id="vencimento-${c.id}" value="${c.vencimento}"></td>
+          <td><button onclick="salvar(${c.id})">Salvar</button></td>
         `;
         corpoTabela.appendChild(tr);
       });
@@ -133,15 +143,11 @@
       if (error) {
         alert('Erro ao salvar: ' + error.message);
       } else {
-        alert('Cliente atualizado com sucesso!');
-        carregarClientes(filtro.value);
+        alert('Cliente atualizado!');
       }
     }
 
-    filtro.addEventListener('input', () => {
-      carregarClientes(filtro.value);
-    });
-
+    filtro.addEventListener('input', () => carregarClientes(filtro.value));
     carregarClientes();
   </script>
 </body>
