@@ -3,10 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <title>Clientes - PoupyAI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background-color: #eef2f5;
+      font-family: 'Inter', sans-serif;
+      background-color: #f1f5f9;
+      margin: 0;
       padding: 2rem;
     }
 
@@ -23,11 +29,13 @@
     }
 
     .filtro-unico input {
-      width: 400px;
-      padding: 0.5rem;
+      width: 100%;
+      max-width: 400px;
+      padding: 0.6rem;
       font-size: 1rem;
       border: 1px solid #ccc;
-      border-radius: 5px;
+      border-radius: 8px;
+      outline: none;
     }
 
     table {
@@ -35,11 +43,14 @@
       border-collapse: collapse;
       background-color: white;
       box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      border-radius: 8px;
+      overflow: hidden;
     }
 
     th, td {
-      padding: 0.75rem;
-      border: 1px solid #ddd;
+      padding: 0.9rem;
+      text-align: left;
+      border-bottom: 1px solid #eee;
     }
 
     th {
@@ -47,38 +58,77 @@
       color: white;
     }
 
-    td input, td select {
+    td input,
+    td select {
       width: 100%;
       padding: 0.4rem;
       border: 1px solid #ccc;
-      border-radius: 4px;
+      border-radius: 5px;
+      font-size: 0.95rem;
+      background-color: #f9f9f9;
     }
 
     .botoes {
       display: flex;
-      gap: 5px;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
     button {
-      padding: 0.4rem 0.7rem;
+      padding: 0.4rem 0.8rem;
       font-size: 0.9rem;
       border: none;
       border-radius: 4px;
       cursor: pointer;
+      transition: background-color 0.2s;
     }
 
     .salvar {
-      background-color: #28a745;
+      background-color: #16a34a;
       color: white;
+    }
+
+    .salvar:hover {
+      background-color: #15803d;
     }
 
     .deletar {
-      background-color: #dc3545;
+      background-color: #dc2626;
       color: white;
     }
 
-    button:hover {
-      opacity: 0.9;
+    .deletar:hover {
+      background-color: #b91c1c;
+    }
+
+    @media (max-width: 768px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+
+      thead {
+        display: none;
+      }
+
+      tr {
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background-color: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+      }
+
+      td {
+        padding: 0.5rem 0;
+      }
+
+      td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        display: block;
+        color: #444;
+        margin-bottom: 0.25rem;
+      }
     }
   </style>
 </head>
@@ -86,7 +136,7 @@
   <h1>Lista de Clientes</h1>
 
   <div class="filtro-unico">
-    <input type="text" id="filtro-unico" placeholder="Buscar por qualquer campo..." oninput="filtrarClientes()">
+    <input type="text" id="filtro-unico" placeholder="Buscar por nome, telefone, lista, servidor ou 24/07..." oninput="filtrarClientes()">
   </div>
 
   <table>
@@ -131,17 +181,17 @@
       clientes.forEach(cliente => {
         const linha = document.createElement('tr');
         linha.innerHTML = `
-          <td><input type="text" value="${cliente.nome}" id="nome-${cliente.id}"></td>
-          <td><input type="text" value="${cliente.telefone}" id="telefone-${cliente.id}"></td>
-          <td><input type="text" value="${cliente.lista}" id="lista-${cliente.id}"></td>
-          <td>
+          <td data-label="Nome"><input type="text" value="${cliente.nome}" id="nome-${cliente.id}"></td>
+          <td data-label="Telefone"><input type="text" value="${cliente.telefone}" id="telefone-${cliente.id}"></td>
+          <td data-label="Lista"><input type="text" value="${cliente.lista}" id="lista-${cliente.id}"></td>
+          <td data-label="Servidor">
             <select id="servidor-${cliente.id}">
               ${['NOW','STREAMLY','NEXT','BLADE','TOP','UNITV'].map(opcao => `
                 <option value="${opcao}" ${cliente.servidor === opcao ? 'selected' : ''}>${opcao}</option>
               `).join('')}
             </select>
           </td>
-          <td><input type="date" value="${cliente.vencimento}" id="vencimento-${cliente.id}"></td>
+          <td data-label="Vencimento"><input type="date" value="${cliente.vencimento}" id="vencimento-${cliente.id}"></td>
           <td class="botoes">
             <button class="salvar" onclick="salvar('${cliente.id}')">Salvar</button>
             <button class="deletar" onclick="deletar('${cliente.id}')">Deletar</button>
@@ -190,30 +240,30 @@
     }
 
     function filtrarClientes() {
-  const termo = document.getElementById('filtro-unico').value.trim().toLowerCase();
+      const termo = document.getElementById('filtro-unico').value.trim().toLowerCase();
+      const isData = /^\d{2}\/\d{2}$/.test(termo);
 
-  const isData = /^\d{2}\/\d{2}$/.test(termo); // detecta formato 24/07
+      const filtrados = todosClientes.filter(cliente => {
+        const venc = new Date(cliente.vencimento);
+        const dia = String(venc.getUTCDate()).padStart(2, '0');
+        const mes = String(venc.getUTCMonth() + 1).padStart(2, '0');
+        const dataFormatada = `${dia}/${mes}`;
 
-  const filtrados = todosClientes.filter(cliente => {
-    const venc = new Date(cliente.vencimento);
-    const dia = String(venc.getUTCDate()).padStart(2, '0');
-    const mes = String(venc.getUTCMonth() + 1).padStart(2, '0');
-    const dataFormatada = `${dia}/${mes}`; // ex: 24/07
+        if (isData) {
+          return dataFormatada === termo;
+        } else {
+          return (
+            cliente.nome.toLowerCase().includes(termo) ||
+            cliente.telefone.toLowerCase().includes(termo) ||
+            cliente.lista.toLowerCase().includes(termo) ||
+            cliente.servidor.toLowerCase().includes(termo)
+          );
+        }
+      });
 
-    if (isData) {
-      return dataFormatada === termo;
-    } else {
-      return (
-        cliente.nome.toLowerCase().includes(termo) ||
-        cliente.telefone.toLowerCase().includes(termo) ||
-        cliente.lista.toLowerCase().includes(termo) ||
-        cliente.servidor.toLowerCase().includes(termo)
-      );
+      renderClientes(filtrados);
     }
-  });
 
-  renderClientes(filtrados);
-}
     carregarClientes();
   </script>
 </body>
