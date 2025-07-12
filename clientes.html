@@ -2,11 +2,12 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Clientes - PoupyAI</title>
+  <title>Listagem de Clientes - PoupyAI</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #eef2f5;
+      background: #f0f4f8;
+      margin: 0;
       padding: 2rem;
     }
 
@@ -15,27 +16,30 @@
       color: #175197;
     }
 
-    .search-box {
+    .search {
       text-align: center;
       margin-bottom: 1rem;
     }
 
-    .search-box input {
-      width: 300px;
+    .search input {
       padding: 0.5rem;
+      width: 300px;
+      max-width: 90%;
       border: 1px solid #ccc;
-      border-radius: 5px;
+      border-radius: 4px;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 1rem;
+      background-color: white;
     }
 
     th, td {
       padding: 0.75rem;
-      border: 1px solid #ddd;
+      border: 1px solid #ccc;
+      text-align: left;
     }
 
     th {
@@ -43,35 +47,56 @@
       color: white;
     }
 
-    td input {
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    input[type="text"], input[type="date"], select {
       width: 100%;
-      padding: 0.4rem;
+      padding: 0.25rem;
       border: 1px solid #ccc;
       border-radius: 4px;
     }
 
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
     button {
       padding: 0.4rem 0.8rem;
-      background-color: #175197;
-      color: white;
       border: none;
       border-radius: 4px;
       cursor: pointer;
     }
 
-    button:hover {
+    .save-btn {
+      background-color: #175197;
+      color: white;
+    }
+
+    .delete-btn {
+      background-color: #d9534f;
+      color: white;
+    }
+
+    .save-btn:hover {
       background-color: #143d78;
+    }
+
+    .delete-btn:hover {
+      background-color: #c9302c;
     }
   </style>
 </head>
 <body>
-  <h1>Lista de Clientes</h1>
+  <h1>Listagem de Clientes</h1>
 
-  <div class="search-box">
-    <input type="text" id="filtro" placeholder="Buscar por nome..." oninput="filtrarClientes()">
+  <div class="search">
+    <input type="text" id="searchInput" placeholder="Buscar por nome...">
   </div>
 
-  <table>
+  <table id="clientesTable">
     <thead>
       <tr>
         <th>Nome</th>
@@ -82,79 +107,102 @@
         <th>Ações</th>
       </tr>
     </thead>
-    <tbody id="tabela-clientes">
-      <!-- Clientes serão inseridos aqui -->
-    </tbody>
+    <tbody></tbody>
   </table>
 
   <script src="https://unpkg.com/@supabase/supabase-js"></script>
   <script>
-    const supabase = window.supabase.createClient(
+    const supabase = supabase.createClient(
       'https://mrmfxzojroxyqaelsraj.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ybWZ4em9qcm94eXFhZWxzcmFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIyNzEyNTEsImV4cCI6MjA2Nzg0NzI1MX0.TRSmNcf7Cxo11UQx1Jvo4LOU5yE38f8NCMXEf927KsM'
     );
 
-    let todosClientes = [];
+    const tbody = document.querySelector('#clientesTable tbody');
+    const searchInput = document.getElementById('searchInput');
 
     async function carregarClientes() {
-      const { data, error } = await supabase.from('clientes').select('*');
+      const { data: clientes, error } = await supabase
+        .from('clientes')
+        .select('*')
+        .order('vencimento', { ascending: true });
+
       if (error) {
-        alert('Erro ao buscar clientes: ' + error.message);
+        alert('Erro ao carregar clientes: ' + error.message);
         return;
       }
-      todosClientes = data;
-      renderClientes(data);
-    }
 
-    function renderClientes(clientes) {
-      const tabela = document.getElementById('tabela-clientes');
-      tabela.innerHTML = '';
-
+      tbody.innerHTML = '';
       clientes.forEach(cliente => {
-        const linha = document.createElement('tr');
-        linha.innerHTML = `
-          <td><input type="text" value="${cliente.nome}" id="nome-${cliente.id}"></td>
-          <td><input type="text" value="${cliente.telefone}" id="telefone-${cliente.id}"></td>
-          <td><input type="text" value="${cliente.lista}" id="lista-${cliente.id}"></td>
-          <td><input type="text" value="${cliente.servidor}" id="servidor-${cliente.id}"></td>
-          <td><input type="date" value="${cliente.vencimento}" id="vencimento-${cliente.id}"></td>
-          <td><button onclick="salvar('${cliente.id}')">Salvar</button></td>
+        const tr = document.createElement('tr');
+
+        tr.innerHTML = `
+          <td><input type="text" value="${cliente.nome}" data-campo="nome" data-id="${cliente.id}"></td>
+          <td><input type="text" value="${cliente.telefone}" data-campo="telefone" data-id="${cliente.id}"></td>
+          <td><input type="text" value="${cliente.lista}" data-campo="lista" data-id="${cliente.id}"></td>
+          <td>
+            <select data-campo="servidor" data-id="${cliente.id}">
+              ${["NOW", "STREAMLY", "NEXT", "BLADE", "TOP", "UNITV"].map(op =>
+                `<option value="${op}" ${cliente.servidor === op ? "selected" : ""}>${op}</option>`
+              ).join("")}
+            </select>
+          </td>
+          <td><input type="date" value="${cliente.vencimento}" data-campo="vencimento" data-id="${cliente.id}"></td>
+          <td class="actions">
+            <button class="save-btn" onclick="salvar('${cliente.id}')">Salvar</button>
+            <button class="delete-btn" onclick="deletar('${cliente.id}')">Deletar</button>
+          </td>
         `;
-        tabela.appendChild(linha);
+
+        tbody.appendChild(tr);
       });
     }
 
     async function salvar(id) {
-      const clienteAtualizado = {
-        nome: document.getElementById(`nome-${id}`).value,
-        telefone: document.getElementById(`telefone-${id}`).value,
-        lista: document.getElementById(`lista-${id}`).value,
-        servidor: document.getElementById(`servidor-${id}`).value,
-        vencimento: document.getElementById(`vencimento-${id}`).value
-      };
+      const campos = document.querySelectorAll(`[data-id="${id}"]`);
+      const dados = {};
+      campos.forEach(campo => {
+        dados[campo.dataset.campo] = campo.value;
+      });
 
       const { error } = await supabase
         .from('clientes')
-        .update(clienteAtualizado)
+        .update(dados)
         .eq('id', id);
 
       if (error) {
         alert('Erro ao salvar: ' + error.message);
       } else {
-        alert('Cliente salvo com sucesso!');
+        alert('Cliente atualizado com sucesso!');
         carregarClientes();
       }
     }
 
-    function filtrarClientes() {
-      const termo = document.getElementById('filtro').value.toLowerCase();
-      const filtrados = todosClientes.filter(cliente =>
-        cliente.nome.toLowerCase().includes(termo)
-      );
-      renderClientes(filtrados);
+    async function deletar(id) {
+      const confirmar = confirm("Tem certeza que deseja deletar este cliente?");
+      if (!confirmar) return;
+
+      const { error } = await supabase
+        .from('clientes')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        alert('Erro ao deletar: ' + error.message);
+      } else {
+        alert('Cliente deletado com sucesso!');
+        carregarClientes();
+      }
     }
 
-    // Iniciar carregamento
+    searchInput.addEventListener('input', () => {
+      const termo = searchInput.value.toLowerCase();
+      const linhas = tbody.querySelectorAll('tr');
+      linhas.forEach(linha => {
+        const nome = linha.querySelector('input[data-campo="nome"]').value.toLowerCase();
+        linha.style.display = nome.includes(termo) ? '' : 'none';
+      });
+    });
+
     carregarClientes();
   </script>
 </body>
