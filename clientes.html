@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Clientes - PoupyAI</title>
   <style>
     body {
@@ -83,13 +83,13 @@
       </tr>
     </thead>
     <tbody id="tabela-clientes">
-      <!-- Dados serão inseridos aqui -->
+      <!-- Clientes serão inseridos aqui -->
     </tbody>
   </table>
 
   <script src="https://unpkg.com/@supabase/supabase-js"></script>
   <script>
-    const supabase = supabase.createClient(
+    const supabase = window.supabase.createClient(
       'https://mrmfxzojroxyqaelsraj.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ybWZ4em9qcm94eXFhZWxzcmFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIyNzEyNTEsImV4cCI6MjA2Nzg0NzI1MX0.TRSmNcf7Cxo11UQx1Jvo4LOU5yE38f8NCMXEf927KsM'
     );
@@ -112,7 +112,6 @@
 
       clientes.forEach(cliente => {
         const linha = document.createElement('tr');
-
         linha.innerHTML = `
           <td><input type="text" value="${cliente.nome}" id="nome-${cliente.id}"></td>
           <td><input type="text" value="${cliente.telefone}" id="telefone-${cliente.id}"></td>
@@ -121,7 +120,6 @@
           <td><input type="date" value="${cliente.vencimento}" id="vencimento-${cliente.id}"></td>
           <td><button onclick="salvar('${cliente.id}')">Salvar</button></td>
         `;
-
         tabela.appendChild(linha);
       });
     }
@@ -135,7 +133,11 @@
         vencimento: document.getElementById(`vencimento-${id}`).value
       };
 
-      const { error } = await supabase.from('clientes').update(clienteAtualizado).eq('id', id);
+      const { error } = await supabase
+        .from('clientes')
+        .update(clienteAtualizado)
+        .eq('id', id);
+
       if (error) {
         alert('Erro ao salvar: ' + error.message);
       } else {
@@ -146,10 +148,13 @@
 
     function filtrarClientes() {
       const termo = document.getElementById('filtro').value.toLowerCase();
-      const filtrados = todosClientes.filter(c => c.nome.toLowerCase().includes(termo));
+      const filtrados = todosClientes.filter(cliente =>
+        cliente.nome.toLowerCase().includes(termo)
+      );
       renderClientes(filtrados);
     }
 
+    // Iniciar carregamento
     carregarClientes();
   </script>
 </body>
