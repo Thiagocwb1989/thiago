@@ -307,10 +307,22 @@
 
     carregarClientes();
   </script>
-  <script>
-  if (localStorage.getItem('logado') !== 'true') {
+  <div style="text-align: right; margin-bottom: 1rem;">
+  <button onclick="logout()" style="background-color: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 5px;">Logout</button>
+</div>
+
+<script>
+  async function logout() {
+    await supabase.auth.signOut();
     window.location.href = 'login.html';
   }
+
+  (async () => {
+    const { data, error } = await supabase.auth.getUser();
+    if (!data.user) {
+      window.location.href = 'login.html';
+    }
+  })();
 </script>
 </body>
 </html>
