@@ -1,23 +1,14 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Clientes - PoupyAI</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f4f6f8;
+      background-color: #f0f4f8;
+      padding: 2rem;
       margin: 0;
-      padding: 2rem;
-    }
-
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      background: white;
-      padding: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
     h1 {
@@ -25,71 +16,59 @@
       color: #175197;
     }
 
-    input[type="text"] {
+    #filtro {
       width: 100%;
+      max-width: 400px;
+      margin: 1rem auto;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    #filtro input {
+      flex: 1;
       padding: 0.5rem;
-      margin-bottom: 1rem;
-      border: 1px solid #ccc;
       border-radius: 4px;
+      border: 1px solid #ccc;
     }
 
-    table {
+    .cliente {
+      background: white;
+      margin: 1rem auto;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      max-width: 600px;
+    }
+
+    .cliente input {
       width: 100%;
-      border-collapse: collapse;
+      margin-top: 4px;
+      padding: 6px;
+      margin-bottom: 8px;
     }
 
-    th, td {
-      padding: 0.75rem;
-      text-align: left;
-      border-bottom: 1px solid #ddd;
-    }
-
-    button {
-      padding: 0.4rem 0.8rem;
-      background-color: #175197;
+    .cliente button {
+      background: #175197;
       color: white;
       border: none;
+      padding: 0.5rem;
       border-radius: 4px;
       cursor: pointer;
     }
 
-    button:hover {
+    .cliente button:hover {
       background-color: #143d78;
-    }
-
-    .edit-input {
-      width: 90%;
-      padding: 0.3rem;
-      font-size: 0.9rem;
-    }
-
-    .edit-actions {
-      display: flex;
-      gap: 0.5rem;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Clientes Cadastrados</h1>
-    <input type="text" id="filtro" placeholder="Filtrar por nome ou telefone..." />
+  <h1>Clientes Cadastrados</h1>
 
-    <table id="tabelaClientes">
-      <thead>
-        <tr>
-          <th>Nome</th>
-          <th>Telefone</th>
-          <th>Lista</th>
-          <th>Servidor</th>
-          <th>Vencimento</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Dados serão inseridos via JS -->
-      </tbody>
-    </table>
+  <div id="filtro">
+    <input type="text" id="filtroNome" placeholder="Filtrar por nome...">
   </div>
+
+  <div id="listaClientes"></div>
 
   <script src="https://unpkg.com/@supabase/supabase-js"></script>
   <script>
@@ -98,71 +77,62 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ybWZ4em9qcm94eXFhZWxzcmFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIyNzEyNTEsImV4cCI6MjA2Nzg0NzI1MX0.TRSmNcf7Cxo11UQx1Jvo4LOU5yE38f8NCMXEf927KsM'
     );
 
-    const tabela = document.getElementById('tabelaClientes').querySelector('tbody');
-    const filtro = document.getElementById('filtro');
-    let clientesOriginais = [];
+    const lista = document.getElementById('listaClientes');
+    const filtroNome = document.getElementById('filtroNome');
 
-    async function carregarClientes() {
-      const { data, error } = await supabase.from('clientes').select('*');
+    async function carregarClientes(filtro = '') {
+      let query = supabase.from('clientes').select('*');
+
+      if (filtro) {
+        query = query.ilike('nome', `%${filtro}%`);
+      }
+
+      const { data, error } = await query;
+
+      lista.innerHTML = '';
+
       if (error) {
-        alert('Erro ao carregar clientes: ' + error.message);
+        lista.innerHTML = 'Erro ao carregar clientes.';
         return;
       }
-      clientesOriginais = data;
-      mostrarClientes(data);
-    }
 
-    function mostrarClientes(clientes) {
-      tabela.innerHTML = '';
-      clientes.forEach(cliente => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><input class="edit-input" value="${cliente.nome}" data-id="${cliente.id}" data-campo="nome"></td>
-          <td><input class="edit-input" value="${cliente.telefone}" data-id="${cliente.id}" data-campo="telefone"></td>
-          <td><input class="edit-input" value="${cliente.lista}" data-id="${cliente.id}" data-campo="lista"></td>
-          <td>
-            <select class="edit-input" data-id="${cliente.id}" data-campo="servidor">
-              ${['NOW', 'STREAMLY', 'NEXT', 'BLADE', 'TOP', 'UNITV'].map(op =>
-                `<option value="${op}" ${cliente.servidor === op ? 'selected' : ''}>${op}</option>`
-              ).join('')}
-            </select>
-          </td>
-          <td><input class="edit-input" type="date" value="${cliente.vencimento}" data-id="${cliente.id}" data-campo="vencimento"></td>
-          <td class="edit-actions">
-            <button onclick="salvarEdicao(${cliente.id})">Salvar</button>
-          </td>
+      data.forEach(cliente => {
+        const div = document.createElement('div');
+        div.className = 'cliente';
+        div.innerHTML = `
+          <input type="text" value="${cliente.nome}" id="nome-${cliente.id}">
+          <input type="text" value="${cliente.telefone}" id="telefone-${cliente.id}">
+          <input type="text" value="${cliente.lista}" id="lista-${cliente.id}">
+          <input type="text" value="${cliente.servidor}" id="servidor-${cliente.id}">
+          <input type="date" value="${cliente.vencimento}" id="vencimento-${cliente.id}">
+          <button onclick="salvar(${cliente.id})">Salvar Alterações</button>
         `;
-        tabela.appendChild(tr);
+        lista.appendChild(div);
       });
     }
 
-    async function salvarEdicao(id) {
-      const inputs = document.querySelectorAll(`[data-id="${id}"]`);
-      const dadosAtualizados = {};
-      inputs.forEach(input => {
-        dadosAtualizados[input.getAttribute('data-campo')] = input.value;
-      });
+    async function salvar(id) {
+      const nome = document.getElementById(`nome-${id}`).value;
+      const telefone = document.getElementById(`telefone-${id}`).value;
+      const lista = document.getElementById(`lista-${id}`).value;
+      const servidor = document.getElementById(`servidor-${id}`).value;
+      const vencimento = document.getElementById(`vencimento-${id}`).value;
 
       const { error } = await supabase
         .from('clientes')
-        .update(dadosAtualizados)
+        .update({ nome, telefone, lista, servidor, vencimento })
         .eq('id', id);
 
       if (error) {
         alert('Erro ao salvar: ' + error.message);
       } else {
-        alert('Cliente atualizado com sucesso!');
-        carregarClientes();
+        alert('Alterações salvas com sucesso!');
+        carregarClientes(filtroNome.value);
       }
     }
 
-    filtro.addEventListener('input', () => {
-      const termo = filtro.value.toLowerCase();
-      const filtrados = clientesOriginais.filter(cliente =>
-        cliente.nome.toLowerCase().includes(termo) ||
-        cliente.telefone.toLowerCase().includes(termo)
-      );
-      mostrarClientes(filtrados);
+    filtroNome.addEventListener('input', () => {
+      carregarClientes(filtroNome.value);
     });
 
     carregarClientes();
