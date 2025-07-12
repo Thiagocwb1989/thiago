@@ -4,72 +4,6 @@
   <meta charset="UTF-8">
   <title>Clientes - PoupyAI</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #eef2f5;
-      padding: 2rem;
-    }
-
-    h1 {
-      text-align: center;
-      color: #175197;
-      margin-bottom: 1.5rem;
-    }
-
-    .filtro-unico {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 1.5rem;
-    }
-
-    .filtro-unico input {
-      width: 400px;
-      padding: 0.5rem;
-      font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background-color: white;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-
-    th, td {
-      padding: 0.75rem;
-      border: 1px solid #ddd;
-    }
-
-    th {
-      background-color: #175197;
-      color: white;
-    }
-
-    td input, td select {
-      width: 100%;
-      padding: 0.4rem;
-      border: none;
-      background-color: transparent;
-    }
-
-    .botoes {
-      display: flex;
-      gap: 5px;
-    }
-
-    button {
-      padding: 0.4rem 0.7rem;
-      font-size: 0.9rem;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    .salvar {
-      background-color: #28a745;
-      color: white<style>
   body {
     font-family: Arial, sans-serif;
     background-color: #eef2f5;
@@ -96,52 +30,42 @@
     border-radius: 5px;
   }
 
-  table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 1rem; /* Espaço entre as linhas */
-  }
-
-  th {
-    background-color: #175197;
-    color: white;
-    padding: 0.75rem;
-    text-align: left;
-  }
-
-  td {
+  .card-cliente {
     background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 10px;
     padding: 1rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   }
 
-  td input, td select {
+  .grid-campos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+
+  .grid-campos input,
+  .grid-campos select {
     width: 100%;
     padding: 0.5rem;
-    border: none;
-    border-bottom: 1px solid #ccc;
-    background: transparent;
     font-size: 1rem;
-  }
-
-  td input:focus, td select:focus {
-    outline: none;
-    border-bottom: 1px solid #175197;
+    border: 1px solid #ccc;
+    border-radius: 5px;
   }
 
   .botoes {
     display: flex;
     justify-content: center;
-    gap: 10px;
-    margin-top: 0.5rem;
+    margin-top: 1rem;
+    gap: 1rem;
   }
 
-  button {
+  .botoes button {
     padding: 0.5rem 1rem;
     font-size: 0.9rem;
     border: none;
-    border-radius: 4px;
+    border-radius: 5px;
     cursor: pointer;
   }
 
@@ -155,10 +79,11 @@
     color: white;
   }
 
-  button:hover {
+  .salvar:hover, .deletar:hover {
     opacity: 0.9;
   }
 </style>
+
 </head>
 <body>
   <h1>Lista de Clientes</h1>
