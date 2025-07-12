@@ -16,16 +16,14 @@
       margin-bottom: 1.5rem;
     }
 
-    .filters {
+    .filtro-unico {
       display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
       justify-content: center;
       margin-bottom: 1.5rem;
     }
 
-    .filters input,
-    .filters select {
+    .filtro-unico input {
+      width: 400px;
       padding: 0.5rem;
       font-size: 1rem;
       border: 1px solid #ccc;
@@ -42,7 +40,6 @@
     th, td {
       padding: 0.75rem;
       border: 1px solid #ddd;
-      text-align: left;
     }
 
     th {
@@ -88,20 +85,8 @@
 <body>
   <h1>Lista de Clientes</h1>
 
-  <div class="filters">
-    <input type="text" id="filtro-nome" placeholder="Filtrar por nome" oninput="filtrarClientes()">
-    <input type="text" id="filtro-telefone" placeholder="Filtrar por telefone" oninput="filtrarClientes()">
-    <input type="text" id="filtro-lista" placeholder="Filtrar por lista" oninput="filtrarClientes()">
-    <select id="filtro-servidor" onchange="filtrarClientes()">
-      <option value="">Todos os servidores</option>
-      <option value="NOW">NOW</option>
-      <option value="STREAMLY">STREAMLY</option>
-      <option value="NEXT">NEXT</option>
-      <option value="BLADE">BLADE</option>
-      <option value="TOP">TOP</option>
-      <option value="UNITV">UNITV</option>
-    </select>
-    <input type="date" id="filtro-vencimento" onchange="filtrarClientes()">
+  <div class="filtro-unico">
+    <input type="text" id="filtro-unico" placeholder="Buscar por qualquer campo..." oninput="filtrarClientes()">
   </div>
 
   <table>
@@ -116,7 +101,7 @@
       </tr>
     </thead>
     <tbody id="tabela-clientes">
-      <!-- Clientes serão inseridos aqui -->
+      <!-- Clientes serão listados aqui -->
     </tbody>
   </table>
 
@@ -205,18 +190,14 @@
     }
 
     function filtrarClientes() {
-      const termoNome = document.getElementById('filtro-nome').value.toLowerCase();
-      const termoTelefone = document.getElementById('filtro-telefone').value.toLowerCase();
-      const termoLista = document.getElementById('filtro-lista').value.toLowerCase();
-      const servidor = document.getElementById('filtro-servidor').value;
-      const vencimento = document.getElementById('filtro-vencimento').value;
+      const termo = document.getElementById('filtro-unico').value.toLowerCase();
 
       const filtrados = todosClientes.filter(cliente =>
-        cliente.nome.toLowerCase().includes(termoNome) &&
-        cliente.telefone.toLowerCase().includes(termoTelefone) &&
-        cliente.lista.toLowerCase().includes(termoLista) &&
-        (servidor === '' || cliente.servidor === servidor) &&
-        (vencimento === '' || cliente.vencimento === vencimento)
+        cliente.nome.toLowerCase().includes(termo) ||
+        cliente.telefone.toLowerCase().includes(termo) ||
+        cliente.lista.toLowerCase().includes(termo) ||
+        cliente.servidor.toLowerCase().includes(termo) ||
+        cliente.vencimento.includes(termo)
       );
 
       renderClientes(filtrados);
