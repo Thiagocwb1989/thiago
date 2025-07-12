@@ -10,6 +10,62 @@
     background-color: #eef2f5;
     padding: 2rem;
   }
+    #modal-editar {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+#modal-editar .modal-conteudo {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+}
+
+#modal-editar h3 {
+  margin-top: 0;
+  font-size: 1.3rem;
+  color: #175197;
+  margin-bottom: 15px;
+}
+
+#modal-editar input,
+#modal-editar select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+#modal-editar button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+#modal-editar button:first-of-type {
+  background-color: #6c757d;
+  color: white;
+}
+
+#modal-editar button:last-of-type {
+  background-color: #28a745;
+  color: white;
+  margin-left: 10px;
+}
+
 
   h1 {
     text-align: center;
@@ -318,18 +374,18 @@
   })();
 </script>
  <!-- Modal correto -->
-<div id="modal-editar" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center;">
-  <div style="background:#fff; padding:20px; border-radius:8px; width:400px; position:relative;">
+<div id="modal-editar">
+  <div class="modal-conteudo">
     <h3>Editar Cliente</h3>
     <input type="hidden" id="editar-id">
     <label>Nome:</label>
-    <input type="text" id="editar-nome" style="width:100%; margin-bottom:10px;"><br>
+    <input type="text" id="editar-nome">
     <label>Telefone:</label>
-    <input type="text" id="editar-telefone" style="width:100%; margin-bottom:10px;"><br>
+    <input type="text" id="editar-telefone">
     <label>Lista:</label>
-    <input type="text" id="editar-lista" style="width:100%; margin-bottom:10px;"><br>
+    <input type="text" id="editar-lista">
     <label>Servidor:</label>
-    <select id="editar-servidor" style="width:100%; margin-bottom:10px;">
+    <select id="editar-servidor">
       <option value="NOW">NOW</option>
       <option value="STREAMLY">STREAMLY</option>
       <option value="NEXT">NEXT</option>
@@ -338,8 +394,8 @@
       <option value="UNITV">UNITV</option>
     </select>
     <label>Vencimento:</label>
-    <input type="date" id="editar-vencimento" style="width:100%; margin-bottom:10px;"><br>
-    <div style="text-align:right;">
+    <input type="date" id="editar-vencimento">
+    <div style="text-align: right; margin-top: 10px;">
       <button onclick="fecharModal()">Cancelar</button>
       <button onclick="salvarEdicao()">Salvar</button>
     </div>
@@ -348,19 +404,22 @@
 
 <script>
   function abrirModal(id) {
-    const cliente = todosClientes.find(c => c.id === id);
-    if (!cliente) return;
+  const cliente = todosClientes.find(c => c.id === id);
+  if (!cliente) return;
 
-    document.getElementById('editar-id').value = cliente.id;
-    document.getElementById('editar-nome').value = cliente.nome;
-    document.getElementById('editar-telefone').value = cliente.telefone;
-    document.getElementById('editar-lista').value = cliente.lista;
-    document.getElementById('editar-servidor').value = cliente.servidor;
-    document.getElementById('editar-vencimento').value = cliente.vencimento;
+  // Converter a data de vencimento de YYYY-MM-DD para DD/MM/AAAA
+  const [ano, mes, dia] = cliente.vencimento.split('-');
+  const vencFormatada = `${dia}/${mes}/${ano}`;
 
-    document.getElementById('modal-editar').style.display = 'flex';
-  }
+  document.getElementById('editar-id').value = cliente.id;
+  document.getElementById('editar-nome').value = cliente.nome;
+  document.getElementById('editar-telefone').value = cliente.telefone;
+  document.getElementById('editar-lista').value = cliente.lista;
+  document.getElementById('editar-servidor').value = cliente.servidor;
+  document.getElementById('editar-vencimento').value = `${ano}-${mes}-${dia}`; // input date ainda espera YYYY-MM-DD
 
+  document.getElementById('modal-editar').style.display = 'flex';
+}
   function fecharModal() {
     document.getElementById('modal-editar').style.display = 'none';
   }
