@@ -2,17 +2,11 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Base de Clientes</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <title>Clientes - PoupyAI</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
     body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f1f5f9;
-      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #eef2f5;
       padding: 2rem;
     }
 
@@ -25,130 +19,89 @@
     .filtro-unico {
       display: flex;
       justify-content: center;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
     }
 
     .filtro-unico input {
-      width: 100%;
-      max-width: 400px;
-      padding: 0.6rem 1rem;
+      width: 400px;
+      padding: 0.5rem;
       font-size: 1rem;
-      border: none;
-      border-radius: 8px;
-      background-color: white;
-      box-shadow: 0 0 0 1px #ccc inset;
-      transition: box-shadow 0.2s;
-    }
-
-    .filtro-unico input:focus {
-      box-shadow: 0 0 0 2px #175197 inset;
-      outline: none;
+      border: 1px solid #ccc;
+      border-radius: 5px;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
       background-color: white;
-      border-radius: 12px;
-      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
 
-    thead {
+    th, td {
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+    }
+
+    th {
       background-color: #175197;
       color: white;
     }
 
-    th, td {
-      padding: 1rem;
-      text-align: left;
-    }
-
-    tbody tr:nth-child(even) {
-      background-color: #f9fbfd;
-    }
-
-    tbody tr:nth-child(odd) {
-      background-color: #ffffff;
-    }
-
-    td input,
-    td select {
+    td input, td select {
       width: 100%;
-      padding: 0.4rem 0.6rem;
-      font-size: 0.95rem;
+      padding: 0.4rem;
       border: none;
       background-color: transparent;
-      border-radius: 6px;
-      transition: background-color 0.2s;
-    }
-
-    td input:focus,
-    td select:focus {
-      background-color: #e6f0fa;
-      outline: none;
     }
 
     .botoes {
       display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
+      gap: 5px;
     }
 
     button {
-      padding: 0.4rem 0.8rem;
-      font-size: 0.85rem;
+      padding: 0.4rem 0.7rem;
+      font-size: 0.9rem;
       border: none;
-      border-radius: 6px;
+      border-radius: 4px;
       cursor: pointer;
-      transition: background-color 0.2s;
     }
 
     .salvar {
-      background-color: #16a34a;
+      background-color: #28a745;
       color: white;
-    }
-
-    .salvar:hover {
-      background-color: #15803d;
     }
 
     .deletar {
-      background-color: #dc2626;
+      background-color: #dc3545;
       color: white;
     }
 
-    .deletar:hover {
-      background-color: #b91c1c;
+    button:hover {
+      opacity: 0.9;
     }
 
-    @media (max-width: 768px) {
-      table, thead, tbody, th, td, tr {
-        display: block;
-      }
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
 
-      thead {
-        display: none;
-      }
+    #paginacao {
+      display: flex;
+      justify-content: center;
+      margin-top: 1.5rem;
+      gap: 10px;
+      font-weight: bold;
+    }
 
-      tr {
-        margin-bottom: 1.5rem;
-        padding: 1rem;
-        background-color: white;
-        border-radius: 8px;
-        box-shadow: 0 0 4px rgba(0,0,0,0.1);
-      }
+    #paginacao button {
+      background-color: #175197;
+      color: white;
+      padding: 0.4rem 0.8rem;
+    }
 
-      td {
-        padding: 0.5rem 0;
-      }
-
-      td::before {
-        content: attr(data-label);
-        font-weight: bold;
-        display: block;
-        color: #444;
-        margin-bottom: 0.25rem;
-      }
+    #paginacao button:disabled {
+      background-color: #999;
+      cursor: not-allowed;
     }
   </style>
 </head>
@@ -156,7 +109,7 @@
   <h1>Lista de Clientes</h1>
 
   <div class="filtro-unico">
-    <input type="text" id="filtro-unico" placeholder="Buscar por nome, telefone, lista, servidor ou 24/07..." oninput="filtrarClientes()">
+    <input type="text" id="filtro-unico" placeholder="Buscar por nome, telefone, lista, servidor ou data (ex: 24/07)" oninput="filtrarClientes()">
   </div>
 
   <table>
@@ -171,165 +124,154 @@
       </tr>
     </thead>
     <tbody id="tabela-clientes">
-      <!-- Clientes serão listados aqui -->
+      <!-- Clientes aqui -->
     </tbody>
   </table>
-  <!-- Adicione isso antes do </table> -->
-</table>
 
-<div id="paginacao" style="display: flex; justify-content: center; margin-top: 1.5rem; gap: 10px;">
-  <button onclick="paginaAnterior()" id="btn-anterior" disabled>Anterior</button>
-  <span id="indicador-pagina" style="align-self: center; font-weight: bold;"></span>
-  <button onclick="proximaPagina()" id="btn-proximo">Próximo</button>
-</div>
+  <div id="paginacao">
+    <button onclick="paginaAnterior()" id="btn-anterior">Anterior</button>
+    <span id="indicador-pagina">Página 1</span>
+    <button onclick="proximaPagina()" id="btn-proximo">Próximo</button>
+  </div>
 
+  <script src="https://unpkg.com/@supabase/supabase-js"></script>
   <script>
-  const supabase = window.supabase.createClient(
-    'https://mrmfxzojroxyqaelsraj.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ybWZ4em9qcm94eXFhZWxzcmFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIyNzEyNTEsImV4cCI6MjA2Nzg0NzI1MX0.TRSmNcf7Cxo11UQx1Jvo4LOU5yE38f8NCMXEf927KsM'
-  );
+    const supabase = supabase.createClient(
+      'https://mrmfxzojroxyqaelsraj.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ybWZ4em9qcm94eXFhZWxzcmFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIyNzEyNTEsImV4cCI6MjA2Nzg0NzI1MX0.TRSmNcf7Cxo11UQx1Jvo4LOU5yE38f8NCMXEf927KsM'
+    );
 
-  let todosClientes = [];
-  let clientesFiltrados = [];
-  let paginaAtual = 1;
-  const porPagina = 10;
+    let todosClientes = [];
+    let clientesFiltrados = [];
+    let paginaAtual = 1;
+    const porPagina = 10;
 
-  async function carregarClientes() {
-    const { data, error } = await supabase.from('clientes').select('*');
-    if (error) {
-      alert('Erro ao buscar clientes: ' + error.message);
-      return;
+    async function carregarClientes() {
+      const { data, error } = await supabase.from('clientes').select('*');
+      if (error) {
+        alert('Erro ao buscar clientes: ' + error.message);
+        return;
+      }
+      todosClientes = data;
+      clientesFiltrados = data;
+      paginaAtual = 1;
+      renderClientes();
     }
-    todosClientes = data;
-    clientesFiltrados = todosClientes;
-    paginaAtual = 1;
-    renderClientesPaginado();
-  }
 
-  function renderClientesPaginado() {
-    const inicio = (paginaAtual - 1) * porPagina;
-    const fim = inicio + porPagina;
-    const clientesPagina = clientesFiltrados.slice(inicio, fim);
+    function renderClientes() {
+      const tabela = document.getElementById('tabela-clientes');
+      tabela.innerHTML = '';
 
-    renderClientes(clientesPagina);
-    atualizarPaginacao();
-  }
+      const inicio = (paginaAtual - 1) * porPagina;
+      const fim = inicio + porPagina;
+      const clientesPagina = clientesFiltrados.slice(inicio, fim);
 
-  function atualizarPaginacao() {
-    const totalPaginas = Math.ceil(clientesFiltrados.length / porPagina);
-    document.getElementById('indicador-pagina').textContent = `Página ${paginaAtual} de ${totalPaginas}`;
+      clientesPagina.forEach(cliente => {
+        const linha = document.createElement('tr');
+        linha.innerHTML = `
+          <td><input type="text" value="${cliente.nome}" id="nome-${cliente.id}"></td>
+          <td><input type="text" value="${cliente.telefone}" id="telefone-${cliente.id}"></td>
+          <td><input type="text" value="${cliente.lista}" id="lista-${cliente.id}"></td>
+          <td>
+            <select id="servidor-${cliente.id}">
+              ${['NOW','STREAMLY','NEXT','BLADE','TOP','UNITV'].map(opcao => `
+                <option value="${opcao}" ${cliente.servidor === opcao ? 'selected' : ''}>${opcao}</option>
+              `).join('')}
+            </select>
+          </td>
+          <td><input type="date" value="${cliente.vencimento}" id="vencimento-${cliente.id}"></td>
+          <td class="botoes">
+            <button class="salvar" onclick="salvar('${cliente.id}')">Salvar</button>
+            <button class="deletar" onclick="deletar('${cliente.id}')">Deletar</button>
+          </td>
+        `;
+        tabela.appendChild(linha);
+      });
 
-    document.getElementById('btn-anterior').disabled = paginaAtual === 1;
-    document.getElementById('btn-proximo').disabled = paginaAtual === totalPaginas || totalPaginas === 0;
-  }
-
-  function paginaAnterior() {
-    if (paginaAtual > 1) {
-      paginaAtual--;
-      renderClientesPaginado();
+      atualizarPaginacao();
     }
-  }
 
-  function proximaPagina() {
-    const totalPaginas = Math.ceil(clientesFiltrados.length / porPagina);
-    if (paginaAtual < totalPaginas) {
-      paginaAtual++;
-      renderClientesPaginado();
+    function atualizarPaginacao() {
+      const totalPaginas = Math.ceil(clientesFiltrados.length / porPagina);
+      document.getElementById('indicador-pagina').textContent = `Página ${paginaAtual} de ${totalPaginas}`;
+      document.getElementById('btn-anterior').disabled = paginaAtual === 1;
+      document.getElementById('btn-proximo').disabled = paginaAtual === totalPaginas || totalPaginas === 0;
     }
-  }
 
-  function renderClientes(clientes) {
-    const tabela = document.getElementById('tabela-clientes');
-    tabela.innerHTML = '';
-
-    clientes.forEach(cliente => {
-      const linha = document.createElement('tr');
-      linha.innerHTML = `
-        <td data-label="Nome"><input type="text" value="${cliente.nome}" id="nome-${cliente.id}"></td>
-        <td data-label="Telefone"><input type="text" value="${cliente.telefone}" id="telefone-${cliente.id}"></td>
-        <td data-label="Lista"><input type="text" value="${cliente.lista}" id="lista-${cliente.id}"></td>
-        <td data-label="Servidor">
-          <select id="servidor-${cliente.id}">
-            ${['NOW','STREAMLY','NEXT','BLADE','TOP','UNITV'].map(opcao => `
-              <option value="${opcao}" ${cliente.servidor === opcao ? 'selected' : ''}>${opcao}</option>
-            `).join('')}
-          </select>
-        </td>
-        <td data-label="Vencimento"><input type="date" value="${cliente.vencimento}" id="vencimento-${cliente.id}"></td>
-        <td class="botoes">
-          <button class="salvar" onclick="salvar('${cliente.id}')">Salvar</button>
-          <button class="deletar" onclick="deletar('${cliente.id}')">Deletar</button>
-        </td>
-      `;
-      tabela.appendChild(linha);
-    });
-  }
-
-  async function salvar(id) {
-    const clienteAtualizado = {
-      nome: document.getElementById(`nome-${id}`).value,
-      telefone: document.getElementById(`telefone-${id}`).value,
-      lista: document.getElementById(`lista-${id}`).value,
-      servidor: document.getElementById(`servidor-${id}`).value,
-      vencimento: document.getElementById(`vencimento-${id}`).value
-    };
-
-    const { error } = await supabase
-      .from('clientes')
-      .update(clienteAtualizado)
-      .eq('id', id);
-
-    if (error) {
-      alert('Erro ao salvar: ' + error.message);
-    } else {
-      alert('Cliente salvo com sucesso!');
-      carregarClientes();
+    function paginaAnterior() {
+      if (paginaAtual > 1) {
+        paginaAtual--;
+        renderClientes();
+      }
     }
-  }
 
-  async function deletar(id) {
-    if (confirm('Tem certeza que deseja deletar este cliente?')) {
-      const { error } = await supabase
-        .from('clientes')
-        .delete()
-        .eq('id', id);
+    function proximaPagina() {
+      const totalPaginas = Math.ceil(clientesFiltrados.length / porPagina);
+      if (paginaAtual < totalPaginas) {
+        paginaAtual++;
+        renderClientes();
+      }
+    }
+
+    async function salvar(id) {
+      const clienteAtualizado = {
+        nome: document.getElementById(`nome-${id}`).value,
+        telefone: document.getElementById(`telefone-${id}`).value,
+        lista: document.getElementById(`lista-${id}`).value,
+        servidor: document.getElementById(`servidor-${id}`).value,
+        vencimento: document.getElementById(`vencimento-${id}`).value
+      };
+
+      const { error } = await supabase.from('clientes').update(clienteAtualizado).eq('id', id);
 
       if (error) {
-        alert('Erro ao deletar: ' + error.message);
+        alert('Erro ao salvar: ' + error.message);
       } else {
-        alert('Cliente deletado com sucesso!');
+        alert('Cliente salvo com sucesso!');
         carregarClientes();
       }
     }
-  }
 
-  function filtrarClientes() {
-    const termo = document.getElementById('filtro-unico').value.trim().toLowerCase();
-    const isData = /^\d{2}\/\d{2}$/.test(termo);
+    async function deletar(id) {
+      if (confirm('Tem certeza que deseja deletar este cliente?')) {
+        const { error } = await supabase.from('clientes').delete().eq('id', id);
 
-    clientesFiltrados = todosClientes.filter(cliente => {
-      const venc = new Date(cliente.vencimento);
-      const dia = String(venc.getUTCDate()).padStart(2, '0');
-      const mes = String(venc.getUTCMonth() + 1).padStart(2, '0');
-      const dataFormatada = `${dia}/${mes}`;
-
-      if (isData) {
-        return dataFormatada === termo;
-      } else {
-        return (
-          cliente.nome.toLowerCase().includes(termo) ||
-          cliente.telefone.toLowerCase().includes(termo) ||
-          cliente.lista.toLowerCase().includes(termo) ||
-          cliente.servidor.toLowerCase().includes(termo)
-        );
+        if (error) {
+          alert('Erro ao deletar: ' + error.message);
+        } else {
+          alert('Cliente deletado com sucesso!');
+          carregarClientes();
+        }
       }
-    });
+    }
 
-    paginaAtual = 1;
-    renderClientesPaginado();
-  }
+    function filtrarClientes() {
+      const termo = document.getElementById('filtro-unico').value.trim().toLowerCase();
+      const isData = /^\d{2}\/\d{2}$/.test(termo);
 
-  carregarClientes();
-</script>
+      clientesFiltrados = todosClientes.filter(cliente => {
+        const venc = new Date(cliente.vencimento);
+        const dia = String(venc.getUTCDate()).padStart(2, '0');
+        const mes = String(venc.getUTCMonth() + 1).padStart(2, '0');
+        const dataFormatada = `${dia}/${mes}`;
+
+        if (isData) {
+          return dataFormatada === termo;
+        } else {
+          return (
+            cliente.nome.toLowerCase().includes(termo) ||
+            cliente.telefone.toLowerCase().includes(termo) ||
+            cliente.lista.toLowerCase().includes(termo) ||
+            cliente.servidor.toLowerCase().includes(termo)
+          );
+        }
+      });
+
+      paginaAtual = 1;
+      renderClientes();
+    }
+
+    carregarClientes();
+  </script>
 </body>
 </html>
