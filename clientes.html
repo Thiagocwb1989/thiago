@@ -4,16 +4,22 @@
   <meta charset="UTF-8">
   <title>Clientes - PoupyAI</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background-color: #eef2f5;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f7fa;
       padding: 2rem;
+      margin: 0;
     }
 
     h1 {
       text-align: center;
-      color: #175197;
-      margin-bottom: 1.5rem;
+      color: #123c69;
+      font-size: 2rem;
+      margin-bottom: 2.5rem;
     }
 
     .filtro-unico {
@@ -21,46 +27,55 @@
       justify-content: center;
       align-items: center;
       gap: 10px;
-      margin-bottom: 1.5rem;
+      margin-bottom: 2rem;
     }
 
     .filtro-unico input {
       width: 400px;
-      padding: 0.5rem;
+      padding: 0.6rem;
       font-size: 1rem;
       border: 1px solid #ccc;
-      border-radius: 6px;
+      border-radius: 8px;
     }
 
-    .btn-voltar {
+    .botoes-topo {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-voltar, .btn-logout {
       background-color: #175197;
       color: white;
       padding: 0.5rem 1rem;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       font-size: 0.95rem;
       font-weight: bold;
       cursor: pointer;
       text-decoration: none;
     }
 
-    .btn-voltar:hover {
+    .btn-voltar:hover, .btn-logout:hover {
       background-color: #143d78;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      border-radius: 8px;
+      border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
       background-color: white;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+      transition: all 0.2s ease-in-out;
     }
 
     th, td {
       padding: 0.75rem;
       text-align: center;
-      border: 0px solid #ddd;
+      border-bottom: 1px solid #eee;
     }
 
     th {
@@ -72,24 +87,40 @@
       background-color: #f9f9f9;
     }
 
+    tbody tr:hover {
+      background-color: #e9f0f7;
+    }
+
+    .expirado {
+      background-color: #ffe5e5 !important;
+    }
+
     .botoes {
       display: flex;
       justify-content: center;
       gap: 6px;
     }
 
-    .deletar {
-      background-color: #dc3545;
-      color: white;
-      border: none;
+    .botoes button {
       padding: 0.4rem 0.8rem;
-      border-radius: 5px;
+      border: none;
+      border-radius: 6px;
       cursor: pointer;
       font-size: 0.85rem;
     }
 
+    .botoes .editar {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .botoes .deletar {
+      background-color: #dc3545;
+      color: white;
+    }
+
     .paginacao {
-      margin-top: 20px;
+      margin-top: 25px;
       display: flex;
       justify-content: center;
       gap: 15px;
@@ -100,7 +131,7 @@
       background-color: #175197;
       color: white;
       border: none;
-      border-radius: 4px;
+      border-radius: 6px;
       cursor: pointer;
     }
 
@@ -108,7 +139,6 @@
       background-color: #143d78;
     }
 
-    /* Modal */
     #modal-editar {
       display: none;
       position: fixed;
@@ -123,16 +153,21 @@
     #modal-editar .modal-conteudo {
       background: white;
       padding: 30px;
-      border-radius: 10px;
+      border-radius: 12px;
       width: 90%;
       max-width: 500px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-      transition: all 0.3s ease;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     #modal-editar h3 {
       margin-top: 0;
-      font-size: 1.3rem;
+      font-size: 1.4rem;
       color: #175197;
       margin-bottom: 15px;
     }
@@ -143,7 +178,7 @@
       padding: 10px;
       margin-bottom: 12px;
       border: 1px solid #ccc;
-      border-radius: 6px;
+      border-radius: 8px;
       font-size: 1rem;
     }
 
@@ -153,7 +188,6 @@
       border-radius: 6px;
       font-size: 0.95rem;
       cursor: pointer;
-      transition: background-color 0.3s;
     }
 
     #modal-editar button:first-of-type {
@@ -161,18 +195,10 @@
       color: white;
     }
 
-    #modal-editar button:first-of-type:hover {
-      background-color: #5a6268;
-    }
-
     #modal-editar button:last-of-type {
       background-color: #28a745;
       color: white;
       margin-left: 10px;
-    }
-
-    #modal-editar button:last-of-type:hover {
-      background-color: #218838;
     }
   </style>
 </head>
@@ -180,8 +206,12 @@
   <h1>Lista de Clientes</h1>
 
   <div class="filtro-unico">
-    <input type="text" id="filtro-unico" placeholder="Buscar por qualquer campo..." oninput="filtrarClientes()">
-    <a href="index.html" class="btn-voltar">Voltar ao Cadastro</a>
+    <input type="text" id="filtro-unico" placeholder="Buscar por nome, telefone, servidor ou data (12/07/2025)" oninput="filtrarClientes()">
+  </div>
+
+  <div class="botoes-topo">
+    <a href="index.html" class="btn-voltar">Cadastro</a>
+    <button onclick="logout()" class="btn-logout">Logout</button>
   </div>
 
   <table>
@@ -204,11 +234,6 @@
     <button onclick="proximaPagina()">Próximo</button>
   </div>
 
-  <div style="text-align: right; margin-bottom: 1rem;">
-    <button onclick="logout()" style="background-color: #dc3545; color: white; padding: 0.5rem 1rem; border: none; border-radius: 5px;">Logout</button>
-  </div>
-
-  <!-- Modal de Edição -->
   <div id="modal-editar">
     <div class="modal-conteudo">
       <h3>Editar Cliente</h3>
@@ -237,7 +262,6 @@
     </div>
   </div>
 
-  <!-- Supabase -->
   <script src="https://unpkg.com/@supabase/supabase-js"></script>
   <script>
     const supabase = window.supabase.createClient(
@@ -252,16 +276,25 @@
 
     async function carregarClientes() {
       const { data, error } = await supabase.from('clientes').select('*');
-      if (error) return alert('Erro ao buscar clientes: ' + error.message);
+      if (error) {
+        alert('Erro ao buscar clientes: ' + error.message);
+        return;
+      }
       todosClientes = data;
       clientesFiltrados = data;
       paginaAtual = 1;
       renderClientes();
     }
 
-    function formatarData(dataISO) {
-      const [ano, mes, dia] = dataISO.split("-");
-      return `${dia}/${mes}/${ano}`;
+    function isExpirado(vencimento) {
+      const hoje = new Date();
+      const data = new Date(vencimento + 'T00:00:00');
+      return data < hoje;
+    }
+
+    function formatarData(data) {
+      const [ano, mes, dia] = data.split('-');
+      return ${dia}/${mes}/${ano};
     }
 
     function renderClientes() {
@@ -274,16 +307,19 @@
 
       clientesPagina.forEach(cliente => {
         const linha = document.createElement('tr');
-        linha.innerHTML = `
+        if (isExpirado(cliente.vencimento)) linha.classList.add('expirado');
+
+        linha.innerHTML = 
           <td>${cliente.nome}</td>
           <td>${cliente.telefone}</td>
           <td>${cliente.lista}</td>
           <td>${cliente.servidor}</td>
           <td>${formatarData(cliente.vencimento)}</td>
           <td class="botoes">
-            <button onclick="abrirModal('${cliente.id}')">Editar</button>
+            <button class="editar" onclick="abrirModal('${cliente.id}')">Editar</button>
             <button class="deletar" onclick="deletar('${cliente.id}')">Deletar</button>
-          </td>`;
+          </td>
+        ;
         tabela.appendChild(linha);
       });
 
@@ -292,7 +328,7 @@
 
     function atualizarPaginacao() {
       const totalPaginas = Math.ceil(clientesFiltrados.length / porPagina);
-      document.getElementById('indicador-pagina').textContent = `Página ${paginaAtual} de ${totalPaginas}`;
+      document.getElementById('indicador-pagina').textContent = Página ${paginaAtual} de ${totalPaginas};
     }
 
     function paginaAnterior() {
@@ -310,30 +346,36 @@
       }
     }
 
+    async function deletar(id) {
+      if (confirm('Tem certeza que deseja deletar este cliente?')) {
+        const { error } = await supabase.from('clientes').delete().eq('id', id);
+        if (error) {
+          alert('Erro ao deletar: ' + error.message);
+        } else {
+          alert('Cliente deletado com sucesso!');
+          carregarClientes();
+        }
+      }
+    }
+
     function filtrarClientes() {
       const termo = document.getElementById('filtro-unico').value.trim().toLowerCase();
-      const isData = /^\d{2}\/\d{2}$/.test(termo);
-
       clientesFiltrados = todosClientes.filter(cliente => {
-        const venc = new Date(cliente.vencimento);
-        const dia = String(venc.getUTCDate()).padStart(2, '0');
-        const mes = String(venc.getUTCMonth() + 1).padStart(2, '0');
-        const dataFormatada = `${dia}/${mes}`;
-
-        return isData ? dataFormatada === termo : (
+        const vencBR = formatarData(cliente.vencimento).toLowerCase();
+        return (
           cliente.nome.toLowerCase().includes(termo) ||
           cliente.telefone.toLowerCase().includes(termo) ||
           cliente.lista.toLowerCase().includes(termo) ||
-          cliente.servidor.toLowerCase().includes(termo)
+          cliente.servidor.toLowerCase().includes(termo) ||
+          vencBR.includes(termo)
         );
       });
-
       paginaAtual = 1;
       renderClientes();
     }
 
     function abrirModal(id) {
-      const cliente = todosClientes.find(c => c.id == id);
+      const cliente = todosClientes.find(c => c.id === id);
       if (!cliente) return;
 
       const [ano, mes, dia] = cliente.vencimento.split('-');
@@ -342,7 +384,7 @@
       document.getElementById('editar-telefone').value = cliente.telefone;
       document.getElementById('editar-lista').value = cliente.lista;
       document.getElementById('editar-servidor').value = cliente.servidor;
-      document.getElementById('editar-vencimento').value = `${ano}-${mes}-${dia}`;
+      document.getElementById('editar-vencimento').value = ${ano}-${mes}-${dia};
       document.getElementById('modal-editar').style.display = 'flex';
     }
 
@@ -359,22 +401,12 @@
         servidor: document.getElementById('editar-servidor').value,
         vencimento: document.getElementById('editar-vencimento').value
       };
-
       const { error } = await supabase.from('clientes').update(clienteAtualizado).eq('id', id);
-      if (error) alert('Erro ao salvar: ' + error.message);
-      else {
+      if (error) {
+        alert('Erro ao salvar: ' + error.message);
+      } else {
         alert('Cliente atualizado com sucesso!');
         fecharModal();
-        carregarClientes();
-      }
-    }
-
-    async function deletar(id) {
-      if (!confirm('Tem certeza que deseja deletar este cliente?')) return;
-      const { error } = await supabase.from('clientes').delete().eq('id', id);
-      if (error) alert('Erro ao deletar: ' + error.message);
-      else {
-        alert('Cliente deletado com sucesso!');
         carregarClientes();
       }
     }
