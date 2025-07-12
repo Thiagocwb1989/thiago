@@ -132,9 +132,12 @@
   });
 </script>
   <script>
-  if (localStorage.getItem('logado') !== 'true') {
+  (async () => {
+  const { data, error } = await supabaseClient.auth.getUser();
+  if (!data.user) {
     window.location.href = 'login.html';
   }
+})();
 </script>
 
   <div style="text-align: right; margin-bottom: 1rem;">
@@ -142,10 +145,10 @@
 </div>
 
 <script>
-  function logout() {
-    localStorage.removeItem('logado');
-    window.location.href = 'login.html';
-  }
+  async function logout() {
+  await supabaseClient.auth.signOut();
+  window.location.href = 'login.html';
+}
 </script>
 
 
