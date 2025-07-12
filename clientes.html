@@ -16,17 +16,20 @@
       margin-bottom: 1.5rem;
     }
 
-    .search-box {
-      text-align: center;
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
       margin-bottom: 1.5rem;
     }
 
-    .search-box input {
-      width: 300px;
+    .filters input,
+    .filters select {
       padding: 0.5rem;
+      font-size: 1rem;
       border: 1px solid #ccc;
       border-radius: 5px;
-      font-size: 1rem;
     }
 
     table {
@@ -85,8 +88,20 @@
 <body>
   <h1>Lista de Clientes</h1>
 
-  <div class="search-box">
-    <input type="text" id="filtro" placeholder="Buscar por nome..." oninput="filtrarClientes()">
+  <div class="filters">
+    <input type="text" id="filtro-nome" placeholder="Filtrar por nome" oninput="filtrarClientes()">
+    <input type="text" id="filtro-telefone" placeholder="Filtrar por telefone" oninput="filtrarClientes()">
+    <input type="text" id="filtro-lista" placeholder="Filtrar por lista" oninput="filtrarClientes()">
+    <select id="filtro-servidor" onchange="filtrarClientes()">
+      <option value="">Todos os servidores</option>
+      <option value="NOW">NOW</option>
+      <option value="STREAMLY">STREAMLY</option>
+      <option value="NEXT">NEXT</option>
+      <option value="BLADE">BLADE</option>
+      <option value="TOP">TOP</option>
+      <option value="UNITV">UNITV</option>
+    </select>
+    <input type="date" id="filtro-vencimento" onchange="filtrarClientes()">
   </div>
 
   <table>
@@ -136,9 +151,9 @@
           <td><input type="text" value="${cliente.lista}" id="lista-${cliente.id}"></td>
           <td>
             <select id="servidor-${cliente.id}">
-              ${['NOW', 'STREAMLY', 'NEXT', 'BLADE', 'TOP', 'UNITV'].map(opcao => 
-                `<option value="${opcao}" ${cliente.servidor === opcao ? 'selected' : ''}>${opcao}</option>`
-              ).join('')}
+              ${['NOW','STREAMLY','NEXT','BLADE','TOP','UNITV'].map(opcao => `
+                <option value="${opcao}" ${cliente.servidor === opcao ? 'selected' : ''}>${opcao}</option>
+              `).join('')}
             </select>
           </td>
           <td><input type="date" value="${cliente.vencimento}" id="vencimento-${cliente.id}"></td>
@@ -190,10 +205,20 @@
     }
 
     function filtrarClientes() {
-      const termo = document.getElementById('filtro').value.toLowerCase();
+      const termoNome = document.getElementById('filtro-nome').value.toLowerCase();
+      const termoTelefone = document.getElementById('filtro-telefone').value.toLowerCase();
+      const termoLista = document.getElementById('filtro-lista').value.toLowerCase();
+      const servidor = document.getElementById('filtro-servidor').value;
+      const vencimento = document.getElementById('filtro-vencimento').value;
+
       const filtrados = todosClientes.filter(cliente =>
-        cliente.nome.toLowerCase().includes(termo)
+        cliente.nome.toLowerCase().includes(termoNome) &&
+        cliente.telefone.toLowerCase().includes(termoTelefone) &&
+        cliente.lista.toLowerCase().includes(termoLista) &&
+        (servidor === '' || cliente.servidor === servidor) &&
+        (vencimento === '' || cliente.vencimento === vencimento)
       );
+
       renderClientes(filtrados);
     }
 
