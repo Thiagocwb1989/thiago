@@ -190,19 +190,26 @@
     }
 
     function filtrarClientes() {
-      const termo = document.getElementById('filtro-unico').value.toLowerCase();
+  const termo = document.getElementById('filtro-unico').value.toLowerCase();
 
-      const filtrados = todosClientes.filter(cliente =>
-        cliente.nome.toLowerCase().includes(termo) ||
-        cliente.telefone.toLowerCase().includes(termo) ||
-        cliente.lista.toLowerCase().includes(termo) ||
-        cliente.servidor.toLowerCase().includes(termo) ||
-        cliente.vencimento.includes(termo)
-      );
+  const filtrados = todosClientes.filter(cliente => {
+    const vencimento = new Date(cliente.vencimento);
+    const dia = String(vencimento.getDate()).padStart(2, '0');
+    const mes = String(vencimento.getMonth() + 1).padStart(2, '0');
+    const ano = vencimento.getFullYear();
+    const vencimentoFormatado = `${dia}/${mes}/${ano}`;
 
-      renderClientes(filtrados);
-    }
+    return (
+      cliente.nome.toLowerCase().includes(termo) ||
+      cliente.telefone.toLowerCase().includes(termo) ||
+      cliente.lista.toLowerCase().includes(termo) ||
+      cliente.servidor.toLowerCase().includes(termo) ||
+      vencimentoFormatado.includes(termo)
+    );
+  });
 
+  renderClientes(filtrados);
+}
     carregarClientes();
   </script>
 </body>
