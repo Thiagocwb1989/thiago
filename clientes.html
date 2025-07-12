@@ -106,6 +106,29 @@
     #paginacao button:disabled {
       background-color: #999;
       cursor: not-allowed;
+
+      .filtro-unico {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.btn-voltar {
+  text-decoration: none;
+  background-color: #175197;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  font-size: 0.95rem;
+  transition: background-color 0.3s;
+}
+
+.btn-voltar:hover {
+  background-color: #143d78;
+}
+
     }
   </style>
 </head>
@@ -113,8 +136,9 @@
   <h1>Lista de Clientes</h1>
 
   <div class="filtro-unico">
-    <input type="text" id="filtro-unico" placeholder="Buscar por nome, telefone, lista, servidor ou data (ex: 24/07)" oninput="filtrarClientes()">
-  </div>
+  <input type="text" id="filtro-unico" placeholder="Buscar por qualquer campo..." oninput="filtrarClientes()">
+  <a href="index.html" class="btn-voltar">Voltar ao Cadastro</a>
+</div>
 
   <table>
     <thead>
