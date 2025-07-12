@@ -16,20 +16,28 @@
     margin-bottom: 1.5rem;
   }
 
-  .filtro-unico {
+  .filtro-container {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
     gap: 10px;
     margin-bottom: 1.5rem;
   }
 
-  .filtro-unico input {
+  .filtro-container input {
     width: 400px;
     padding: 0.5rem;
     font-size: 1rem;
     border: 1px solid #ccc;
     border-radius: 6px;
+  }
+
+  .botoes-topo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
   }
 
   .btn-voltar, .btn-logout {
@@ -47,13 +55,6 @@
 
   .btn-voltar:hover, .btn-logout:hover {
     background-color: #143d78;
-  }
-
-  .botoes-topo {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 10px;
   }
 
   table {
@@ -187,14 +188,12 @@
 </head>
 <body>
   <h1>Lista de Clientes</h1>
-
-  <div class="filtro-unico">
-    <input type="text" id="filtro-unico" placeholder="Buscar por qualquer campo..." oninput="filtrarClientes()">
-  </div>
-
-  <div class="botoes-topo">
-    <a href="index.html" class="btn-voltar">Voltar ao Cadastro</a>
-    <button onclick="logout()" class="btn-logout">Logout</button>
+  <div class="filtro-container">
+    <input type="text" id="filtro-unico" placeholder="Buscar por nome, telefone, lista, servidor ou data (DD/MM)">
+    <div class="botoes-topo">
+      <a href="index.html" class="btn-voltar">Voltar ao Cadastro</a>
+      <button onclick="logout()" class="btn-logout">Logout</button>
+    </div>
   </div>
 
   <table>
@@ -216,191 +215,5 @@
     <span id="indicador-pagina">Página 1</span>
     <button onclick="proximaPagina()">Próximo</button>
   </div>
-
-  <div id="modal-editar">
-    <div class="modal-conteudo">
-      <h3>Editar Cliente</h3>
-      <input type="hidden" id="editar-id">
-      <label>Nome:</label>
-      <input type="text" id="editar-nome">
-      <label>Telefone:</label>
-      <input type="text" id="editar-telefone">
-      <label>Lista:</label>
-      <input type="text" id="editar-lista">
-      <label>Servidor:</label>
-      <select id="editar-servidor">
-        <option value="NOW">NOW</option>
-        <option value="STREAMLY">STREAMLY</option>
-        <option value="NEXT">NEXT</option>
-        <option value="BLADE">BLADE</option>
-        <option value="TOP">TOP</option>
-        <option value="UNITV">UNITV</option>
-      </select>
-      <label>Vencimento:</label>
-      <input type="date" id="editar-vencimento">
-      <div style="text-align: right; margin-top: 10px;">
-        <button onclick="fecharModal()">Cancelar</button>
-        <button onclick="salvarEdicao()">Salvar</button>
-      </div>
-    </div>
-  </div>
-
-  <script src="https://unpkg.com/@supabase/supabase-js"></script>
-  <script>
-    const supabase = window.supabase.createClient(
-      'https://mrmfxzojroxyqaelsraj.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ybWZ4em9qcm94eXFhZWxzcmFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIyNzEyNTEsImV4cCI6MjA2Nzg0NzI1MX0.TRSmNcf7Cxo11UQx1Jvo4LOU5yE38f8NCMXEf927KsM'
-    );
-
-    let todosClientes = [];
-    let clientesFiltrados = [];
-    let paginaAtual = 1;
-    const porPagina = 10;
-
-    async function carregarClientes() {
-      const { data, error } = await supabase.from('clientes').select('*');
-      if (error) {
-        alert('Erro ao buscar clientes: ' + error.message);
-        return;
-      }
-      todosClientes = data;
-      clientesFiltrados = data;
-      paginaAtual = 1;
-      renderClientes();
-    }
-
-    function isExpirado(vencimento) {
-      const hoje = new Date();
-      const data = new Date(vencimento + 'T00:00:00');
-      return data < hoje;
-    }
-
-    function formatarData(data) {
-      const [ano, mes, dia] = data.split('-');
-      return `${dia}/${mes}/${ano}`;
-    }
-
-    function renderClientes() {
-      const tabela = document.getElementById('tabela-clientes');
-      tabela.innerHTML = '';
-
-      const inicio = (paginaAtual - 1) * porPagina;
-      const fim = inicio + porPagina;
-      const clientesPagina = clientesFiltrados.slice(inicio, fim);
-
-      clientesPagina.forEach(cliente => {
-        const linha = document.createElement('tr');
-        if (isExpirado(cliente.vencimento)) linha.classList.add('expirado');
-
-        linha.innerHTML = `
-          <td>${cliente.nome}</td>
-          <td>${cliente.telefone}</td>
-          <td>${cliente.lista}</td>
-          <td>${cliente.servidor}</td>
-          <td>${formatarData(cliente.vencimento)}</td>
-          <td class="botoes">
-            <button class="editar" onclick="abrirModal('${cliente.id}')">Editar</button>
-            <button class="deletar" onclick="deletar('${cliente.id}')">Deletar</button>
-          </td>
-        `;
-        tabela.appendChild(linha);
-      });
-
-      atualizarPaginacao();
-    }
-
-    function atualizarPaginacao() {
-      const totalPaginas = Math.ceil(clientesFiltrados.length / porPagina);
-      document.getElementById('indicador-pagina').textContent = `Página ${paginaAtual} de ${totalPaginas}`;
-    }
-
-    function paginaAnterior() {
-      if (paginaAtual > 1) {
-        paginaAtual--;
-        renderClientes();
-      }
-    }
-
-    function proximaPagina() {
-      const totalPaginas = Math.ceil(clientesFiltrados.length / porPagina);
-      if (paginaAtual < totalPaginas) {
-        paginaAtual++;
-        renderClientes();
-      }
-    }
-
-    async function deletar(id) {
-      if (confirm('Tem certeza que deseja deletar este cliente?')) {
-        const { error } = await supabase.from('clientes').delete().eq('id', id);
-        if (error) {
-          alert('Erro ao deletar: ' + error.message);
-        } else {
-          alert('Cliente deletado com sucesso!');
-          carregarClientes();
-        }
-      }
-    }
-
-    function filtrarClientes() {
-      const termo = document.getElementById('filtro-unico').value.trim().toLowerCase();
-      clientesFiltrados = todosClientes.filter(cliente =>
-        cliente.nome.toLowerCase().includes(termo) ||
-        cliente.telefone.toLowerCase().includes(termo) ||
-        cliente.lista.toLowerCase().includes(termo) ||
-        cliente.servidor.toLowerCase().includes(termo)
-      );
-      paginaAtual = 1;
-      renderClientes();
-    }
-
-    function abrirModal(id) {
-      const cliente = todosClientes.find(c => c.id === id);
-      if (!cliente) return;
-
-      const [ano, mes, dia] = cliente.vencimento.split('-');
-      document.getElementById('editar-id').value = cliente.id;
-      document.getElementById('editar-nome').value = cliente.nome;
-      document.getElementById('editar-telefone').value = cliente.telefone;
-      document.getElementById('editar-lista').value = cliente.lista;
-      document.getElementById('editar-servidor').value = cliente.servidor;
-      document.getElementById('editar-vencimento').value = `${ano}-${mes}-${dia}`;
-      document.getElementById('modal-editar').style.display = 'flex';
-    }
-
-    function fecharModal() {
-      document.getElementById('modal-editar').style.display = 'none';
-    }
-
-    async function salvarEdicao() {
-      const id = document.getElementById('editar-id').value;
-      const clienteAtualizado = {
-        nome: document.getElementById('editar-nome').value,
-        telefone: document.getElementById('editar-telefone').value,
-        lista: document.getElementById('editar-lista').value,
-        servidor: document.getElementById('editar-servidor').value,
-        vencimento: document.getElementById('editar-vencimento').value
-      };
-      const { error } = await supabase.from('clientes').update(clienteAtualizado).eq('id', id);
-      if (error) {
-        alert('Erro ao salvar: ' + error.message);
-      } else {
-        alert('Cliente atualizado com sucesso!');
-        fecharModal();
-        carregarClientes();
-      }
-    }
-
-    async function logout() {
-      await supabase.auth.signOut();
-      window.location.href = 'login.html';
-    }
-
-    (async () => {
-      const { data } = await supabase.auth.getUser();
-      if (!data.user) window.location.href = 'login.html';
-    })();
-
-    carregarClientes();
-  </script>
 </body>
 </html>
