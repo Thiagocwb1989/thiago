@@ -1,75 +1,57 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8" />
-  <title>Clientes - PoupyAI</title>
+  <meta charset="UTF-8">
+  <title>Lista de Clientes - PoupyAI</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 20px;
-      background-color: #f0f0f0;
+      background-color: #f0f4f8;
+      margin: 0;
+      padding: 2rem;
     }
-
     h1 {
       text-align: center;
       color: #175197;
     }
-
-    #filtro {
-      display: block;
-      margin: 10px auto 20px;
-      padding: 8px;
-      width: 300px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-
     table {
       width: 100%;
-      max-width: 1000px;
-      margin: auto;
       border-collapse: collapse;
-      background: #fff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      margin-top: 2rem;
     }
-
     th, td {
-      padding: 8px;
       border: 1px solid #ccc;
+      padding: 0.5rem;
       text-align: center;
     }
-
     th {
       background-color: #175197;
       color: white;
     }
-
-    input[type="text"], input[type="date"] {
-      width: 100%;
-      padding: 4px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-
     button {
-      background-color: #175197;
-      color: white;
+      padding: 0.3rem 0.6rem;
+      margin: 0.2rem;
       border: none;
-      padding: 5px 10px;
       border-radius: 4px;
       cursor: pointer;
     }
-
-    button:hover {
-      background-color: #143d78;
+    .edit-btn {
+      background-color: #f0ad4e;
+      color: white;
+    }
+    .save-btn {
+      background-color: #5cb85c;
+      color: white;
+    }
+    input[type="text"], input[type="date"] {
+      width: 100%;
+      box-sizing: border-box;
     }
   </style>
 </head>
 <body>
-  <h1>Clientes Cadastrados</h1>
-  <input type="text" id="filtro" placeholder="Filtrar por nome...">
-
-  <table>
+  <h1>Lista de Clientes</h1>
+  <table id="clientesTable">
     <thead>
       <tr>
         <th>Nome</th>
@@ -77,10 +59,10 @@
         <th>Lista</th>
         <th>Servidor</th>
         <th>Vencimento</th>
-        <th>Ação</th>
+        <th>Ações</th>
       </tr>
     </thead>
-    <tbody id="corpoTabela"></tbody>
+    <tbody></tbody>
   </table>
 
   <script src="https://unpkg.com/@supabase/supabase-js"></script>
@@ -90,64 +72,68 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ybWZ4em9qcm94eXFhZWxzcmFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIyNzEyNTEsImV4cCI6MjA2Nzg0NzI1MX0.TRSmNcf7Cxo11UQx1Jvo4LOU5yE38f8NCMXEf927KsM'
     );
 
-    const corpoTabela = document.getElementById('corpoTabela');
-    const filtro = document.getElementById('filtro');
-
-    async function carregarClientes(filtroNome = '') {
-      let query = supabase.from('clientes').select('*').order('nome');
-
-      if (filtroNome) {
-        query = query.ilike('nome', `%${filtroNome}%`);
-      }
-
-      const { data, error } = await query;
-
-      corpoTabela.innerHTML = '';
-
+    async function carregarClientes() {
+      const { data, error } = await supabase.from('clientes').select('*');
       if (error) {
-        corpoTabela.innerHTML = `<tr><td colspan="6">Erro: ${error.message}</td></tr>`;
+        alert('Erro ao carregar: ' + error.message);
         return;
       }
 
-      if (data.length === 0) {
-        corpoTabela.innerHTML = `<tr><td colspan="6">Nenhum cliente encontrado.</td></tr>`;
-        return;
-      }
+      const tbody = document.querySelector('#clientesTable tbody');
+      tbody.innerHTML = '';
 
-      data.forEach(c => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><input type="text" id="nome-${c.id}" value="${c.nome}"></td>
-          <td><input type="text" id="telefone-${c.id}" value="${c.telefone}"></td>
-          <td><input type="text" id="lista-${c.id}" value="${c.lista}"></td>
-          <td><input type="text" id="servidor-${c.id}" value="${c.servidor}"></td>
-          <td><input type="date" id="vencimento-${c.id}" value="${c.vencimento}"></td>
-          <td><button onclick="salvar(${c.id})">Salvar</button></td>
+      data.forEach(cliente => {
+        const row = document.createElement('tr');
+
+        row.innerHTML = `
+          <td><input type="text" value="${cliente.nome}" data-id="${cliente.id}" data-campo="nome" disabled></td>
+          <td><input type="text" value="${cliente.telefone}" data-id="${cliente.id}" data-campo="telefone" disabled></td>
+          <td><input type="text" value="${cliente.lista}" data-id="${cliente.id}" data-campo="lista" disabled></td>
+          <td><input type="text" value="${cliente.servidor}" data-id="${cliente.id}" data-campo="servidor" disabled></td>
+          <td><input type="date" value="${cliente.vencimento}" data-id="${cliente.id}" data-campo="vencimento" disabled></td>
+          <td>
+            <button class="edit-btn" onclick="habilitarEdicao(this)">Editar</button>
+            <button class="save-btn" onclick="salvarEdicao(this)" disabled>Salvar</button>
+          </td>
         `;
-        corpoTabela.appendChild(tr);
+        tbody.appendChild(row);
       });
     }
 
-    async function salvar(id) {
-      const nome = document.getElementById(`nome-${id}`).value;
-      const telefone = document.getElementById(`telefone-${id}`).value;
-      const lista = document.getElementById(`lista-${id}`).value;
-      const servidor = document.getElementById(`servidor-${id}`).value;
-      const vencimento = document.getElementById(`vencimento-${id}`).value;
+    function habilitarEdicao(botaoEditar) {
+      const row = botaoEditar.closest('tr');
+      row.querySelectorAll('input').forEach(input => input.disabled = false);
+      row.querySelector('.save-btn').disabled = false;
+      botaoEditar.disabled = true;
+    }
+
+    async function salvarEdicao(botaoSalvar) {
+      const row = botaoSalvar.closest('tr');
+      const dadosAtualizados = {};
+      let id = null;
+
+      row.querySelectorAll('input').forEach(input => {
+        const campo = input.dataset.campo;
+        if (campo === 'id') return;
+        if (!id) id = input.dataset.id;
+        dadosAtualizados[campo] = input.value;
+        input.disabled = true;
+      });
 
       const { error } = await supabase
         .from('clientes')
-        .update({ nome, telefone, lista, servidor, vencimento })
+        .update(dadosAtualizados)
         .eq('id', id);
 
       if (error) {
         alert('Erro ao salvar: ' + error.message);
       } else {
-        alert('Cliente atualizado!');
+        alert('Dados salvos com sucesso!');
+        row.querySelector('.edit-btn').disabled = false;
+        botaoSalvar.disabled = true;
       }
     }
 
-    filtro.addEventListener('input', () => carregarClientes(filtro.value));
     carregarClientes();
   </script>
 </body>
