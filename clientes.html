@@ -2,13 +2,13 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Listagem de Clientes - PoupyAI</title>
+  <title>Clientes - PoupyAI</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f4f6f8;
+      background-color: #f9f9f9;
       margin: 0;
-      padding: 2rem;
+      padding: 20px;
     }
 
     h1 {
@@ -16,59 +16,67 @@
       color: #175197;
     }
 
-    #filtroNome {
+    #filtro {
       display: block;
-      margin: 1rem auto;
-      padding: 0.5rem;
+      margin: 20px auto;
+      padding: 10px;
       width: 100%;
       max-width: 400px;
       border: 1px solid #ccc;
       border-radius: 4px;
     }
 
-    .cliente {
-      background-color: white;
-      margin: 1rem auto;
-      padding: 1rem;
-      border-radius: 8px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.1);
-      max-width: 600px;
-    }
-
-    .cliente input {
+    table {
       width: 100%;
-      padding: 0.5rem;
-      margin-bottom: 0.5rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+      border-collapse: collapse;
+      margin-top: 20px;
     }
 
-    .cliente button {
+    th, td {
+      padding: 12px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+
+    th {
+      background-color: #175197;
+      color: white;
+    }
+
+    button {
       background-color: #175197;
       color: white;
       border: none;
-      padding: 0.5rem 1rem;
+      padding: 6px 12px;
       border-radius: 4px;
       cursor: pointer;
     }
 
-    .cliente button:hover {
+    button:hover {
       background-color: #143d78;
-    }
-
-    #mensagem {
-      text-align: center;
-      color: #555;
-      margin-top: 2rem;
     }
   </style>
 </head>
 <body>
   <h1>Clientes Cadastrados</h1>
 
-  <input type="text" id="filtroNome" placeholder="Filtrar por nome...">
-  <div id="mensagem"></div>
-  <div id="listaClientes"></div>
+  <input type="text" id="filtro" placeholder="Filtrar por nome...">
+
+  <table id="tabela">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Telefone</th>
+        <th>Lista</th>
+        <th>Servidor</th>
+        <th>Vencimento</th>
+        <th>Ação</th>
+      </tr>
+    </thead>
+    <tbody id="corpoTabela">
+      <!-- Dados vão aqui -->
+    </tbody>
+  </table>
 
   <script src="https://unpkg.com/@supabase/supabase-js"></script>
   <script>
@@ -77,45 +85,36 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ybWZ4em9qcm94eXFhZWxzcmFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIyNzEyNTEsImV4cCI6MjA2Nzg0NzI1MX0.TRSmNcf7Cxo11UQx1Jvo4LOU5yE38f8NCMXEf927KsM'
     );
 
-    const listaClientes = document.getElementById('listaClientes');
-    const filtroNome = document.getElementById('filtroNome');
-    const mensagem = document.getElementById('mensagem');
+    const corpoTabela = document.getElementById('corpoTabela');
+    const filtro = document.getElementById('filtro');
 
-    async function carregarClientes(filtro = '') {
-      mensagem.textContent = 'Carregando...';
-      listaClientes.innerHTML = '';
+    async function carregarClientes(filtroNome = '') {
+      let query = supabase.from('clientes').select('*').order('nome');
 
-      let query = supabase.from('clientes').select('*');
-      if (filtro) {
-        query = query.ilike('nome', `%${filtro}%`);
+      if (filtroNome) {
+        query = query.ilike('nome', `%${filtroNome}%`);
       }
 
       const { data, error } = await query;
 
       if (error) {
-        mensagem.textContent = 'Erro: ' + error.message;
+        alert('Erro ao buscar clientes: ' + error.message);
         return;
       }
 
-      if (!data || data.length === 0) {
-        mensagem.textContent = 'Nenhum cliente encontrado.';
-        return;
-      }
+      corpoTabela.innerHTML = '';
 
-      mensagem.textContent = '';
-
-      data.forEach((cliente) => {
-        const div = document.createElement('div');
-        div.className = 'cliente';
-        div.innerHTML = `
-          <input type="text" id="nome-${cliente.id}" value="${cliente.nome}">
-          <input type="text" id="telefone-${cliente.id}" value="${cliente.telefone}">
-          <input type="text" id="lista-${cliente.id}" value="${cliente.lista}">
-          <input type="text" id="servidor-${cliente.id}" value="${cliente.servidor}">
-          <input type="date" id="vencimento-${cliente.id}" value="${cliente.vencimento}">
-          <button onclick="salvar(${cliente.id})">Salvar</button>
+      data.forEach(cliente => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><input type="text" value="${cliente.nome}" id="nome-${cliente.id}"></td>
+          <td><input type="text" value="${cliente.telefone}" id="telefone-${cliente.id}"></td>
+          <td><input type="text" value="${cliente.lista}" id="lista-${cliente.id}"></td>
+          <td><input type="text" value="${cliente.servidor}" id="servidor-${cliente.id}"></td>
+          <td><input type="date" value="${cliente.vencimento}" id="vencimento-${cliente.id}"></td>
+          <td><button onclick="salvar(${cliente.id})">Salvar</button></td>
         `;
-        listaClientes.appendChild(div);
+        corpoTabela.appendChild(tr);
       });
     }
 
@@ -135,11 +134,12 @@
         alert('Erro ao salvar: ' + error.message);
       } else {
         alert('Cliente atualizado com sucesso!');
+        carregarClientes(filtro.value);
       }
     }
 
-    filtroNome.addEventListener('input', () => {
-      carregarClientes(filtroNome.value);
+    filtro.addEventListener('input', () => {
+      carregarClientes(filtro.value);
     });
 
     carregarClientes();
