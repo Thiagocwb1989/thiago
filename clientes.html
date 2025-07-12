@@ -115,28 +115,30 @@
   margin-bottom: 1.5rem;
 }
 
-  btn-voltar {
-  display: inline-block;
-  text-decoration: none;
+  .btn-voltar {
+  margin-left: 1rem;
   background-color: #175197;
   color: white;
   padding: 0.5rem 1rem;
-  border-radius: 5px;
+  border: none;
+  border-radius: 6px;
   font-size: 0.95rem;
   font-weight: bold;
-  transition: background-color 0.3s;
+  cursor: pointer;
+  text-decoration: none;
 }
 
-  btn-voltar:hover {
+.btn-voltar:hover {
   background-color: #143d78;
 }
+
     }
   </style>
 </head>
 <body>
   <h1>Lista de Clientes</h1>
 
-  <div class="filtro-unico">
+  <div class="filtro-unico" style="display: flex; justify-content: center; align-items: center; gap: 10px;">
   <input type="text" id="filtro-unico" placeholder="Buscar por qualquer campo..." oninput="filtrarClientes()">
   <a href="index.html" class="btn-voltar">Voltar ao Cadastro</a>
 </div>
