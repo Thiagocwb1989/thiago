@@ -190,7 +190,9 @@
     }
 
     function filtrarClientes() {
-  const termo = document.getElementById('filtro-unico').value.toLowerCase();
+  const termo = document.getElementById('filtro-unico').value.trim().toLowerCase();
+
+  const isData = /^\d{2}\/\d{2}(\/\d{4})?$/.test(termo); // verifica se é dd/mm ou dd/mm/yyyy
 
   const filtrados = todosClientes.filter(cliente => {
     const vencimento = new Date(cliente.vencimento);
@@ -199,17 +201,23 @@
     const ano = vencimento.getFullYear();
     const vencimentoFormatado = `${dia}/${mes}/${ano}`;
 
-    return (
-      cliente.nome.toLowerCase().includes(termo) ||
-      cliente.telefone.toLowerCase().includes(termo) ||
-      cliente.lista.toLowerCase().includes(termo) ||
-      cliente.servidor.toLowerCase().includes(termo) ||
-      vencimentoFormatado.includes(termo)
-    );
+    if (isData) {
+      // Se for uma data, comparar apenas vencimento
+      return vencimentoFormatado.startsWith(termo);
+    } else {
+      // Caso contrário, filtrar nome, telefone, lista, servidor
+      return (
+        cliente.nome.toLowerCase().includes(termo) ||
+        cliente.telefone.toLowerCase().includes(termo) ||
+        cliente.lista.toLowerCase().includes(termo) ||
+        cliente.servidor.toLowerCase().includes(termo)
+      );
+    }
   });
 
   renderClientes(filtrados);
 }
+
     carregarClientes();
   </script>
 </body>
