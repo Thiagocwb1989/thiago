@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <title>Listar Clientes - PoupyAI</title>
+  <meta charset="UTF-8" />
+  <title>Clientes - PoupyAI</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f9f9f9;
-      margin: 0;
+      background-color: #eef2f5;
       padding: 2rem;
     }
 
@@ -16,16 +15,16 @@
       color: #175197;
     }
 
-    .filtro {
+    .search-box {
       text-align: center;
       margin-bottom: 1rem;
     }
 
-    input[type="text"] {
-      padding: 0.5rem;
+    .search-box input {
       width: 300px;
+      padding: 0.5rem;
       border: 1px solid #ccc;
-      border-radius: 4px;
+      border-radius: 5px;
     }
 
     table {
@@ -35,9 +34,8 @@
     }
 
     th, td {
-      border: 1px solid #ddd;
       padding: 0.75rem;
-      text-align: left;
+      border: 1px solid #ddd;
     }
 
     th {
@@ -45,8 +43,15 @@
       color: white;
     }
 
+    td input {
+      width: 100%;
+      padding: 0.4rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
     button {
-      padding: 0.5rem 1rem;
+      padding: 0.4rem 0.8rem;
       background-color: #175197;
       color: white;
       border: none;
@@ -60,10 +65,12 @@
   </style>
 </head>
 <body>
-  <h1>Clientes Cadastrados</h1>
-  <div class="filtro">
-    <input type="text" id="busca" placeholder="Buscar por nome..." oninput="filtrarClientes()">
+  <h1>Lista de Clientes</h1>
+
+  <div class="search-box">
+    <input type="text" id="filtro" placeholder="Buscar por nome..." oninput="filtrarClientes()">
   </div>
+
   <table>
     <thead>
       <tr>
@@ -72,11 +79,11 @@
         <th>Lista</th>
         <th>Servidor</th>
         <th>Vencimento</th>
-        <th>Ação</th>
+        <th>Ações</th>
       </tr>
     </thead>
-    <tbody id="tabelaClientes">
-      <!-- Clientes serão inseridos aqui -->
+    <tbody id="tabela-clientes">
+      <!-- Dados serão inseridos aqui -->
     </tbody>
   </table>
 
@@ -91,18 +98,16 @@
 
     async function carregarClientes() {
       const { data, error } = await supabase.from('clientes').select('*');
-
       if (error) {
-        alert('Erro ao carregar clientes: ' + error.message);
+        alert('Erro ao buscar clientes: ' + error.message);
         return;
       }
-
       todosClientes = data;
-      exibirClientes(data);
+      renderClientes(data);
     }
 
-    function exibirClientes(clientes) {
-      const tabela = document.getElementById('tabelaClientes');
+    function renderClientes(clientes) {
+      const tabela = document.getElementById('tabela-clientes');
       tabela.innerHTML = '';
 
       clientes.forEach(cliente => {
@@ -114,35 +119,35 @@
           <td><input type="text" value="${cliente.lista}" id="lista-${cliente.id}"></td>
           <td><input type="text" value="${cliente.servidor}" id="servidor-${cliente.id}"></td>
           <td><input type="date" value="${cliente.vencimento}" id="vencimento-${cliente.id}"></td>
-          <td><button onclick="salvarCliente('${cliente.id}')">Salvar</button></td>
+          <td><button onclick="salvar('${cliente.id}')">Salvar</button></td>
         `;
 
         tabela.appendChild(linha);
       });
     }
 
-    async function salvarCliente(id) {
-      const dados = {
+    async function salvar(id) {
+      const clienteAtualizado = {
         nome: document.getElementById(`nome-${id}`).value,
         telefone: document.getElementById(`telefone-${id}`).value,
         lista: document.getElementById(`lista-${id}`).value,
         servidor: document.getElementById(`servidor-${id}`).value,
-        vencimento: document.getElementById(`vencimento-${id}`).value,
+        vencimento: document.getElementById(`vencimento-${id}`).value
       };
 
-      const { error } = await supabase.from('clientes').update(dados).eq('id', id);
-
+      const { error } = await supabase.from('clientes').update(clienteAtualizado).eq('id', id);
       if (error) {
         alert('Erro ao salvar: ' + error.message);
       } else {
-        alert('Cliente atualizado com sucesso!');
+        alert('Cliente salvo com sucesso!');
+        carregarClientes();
       }
     }
 
     function filtrarClientes() {
-      const termo = document.getElementById('busca').value.toLowerCase();
+      const termo = document.getElementById('filtro').value.toLowerCase();
       const filtrados = todosClientes.filter(c => c.nome.toLowerCase().includes(termo));
-      exibirClientes(filtrados);
+      renderClientes(filtrados);
     }
 
     carregarClientes();
