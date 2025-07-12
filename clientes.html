@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Clientes - PoupyAI</title>
   <style>
     * {
@@ -18,7 +18,7 @@
     h1 {
       text-align: center;
       color: #123c69;
-      font-size: 2rem;
+      font-size: 2.2rem;
       margin-bottom: 2.5rem;
     }
 
@@ -26,30 +26,29 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 2rem;
     }
 
-    .filtro-unico input {
-      width: 400px;
+    .filtro-unico input[type="text"] {
+      width: 320px;
       padding: 0.6rem;
       font-size: 1rem;
       border: 1px solid #ccc;
       border-radius: 8px;
     }
 
-    .filtro-expirados {
+    .filtro-unico label {
+      font-size: 0.95rem;
+      color: #333;
       display: flex;
-      justify-content: center;
-      margin-bottom: 2rem;
+      align-items: center;
+      gap: 6px;
     }
 
-    .filtro-expirados button {
-      padding: 0.4rem 1rem;
-      background-color: #ff6666;
-      color: white;
-      border: none;
-      border-radius: 6px;
+    .filtro-unico input[type="checkbox"] {
+      transform: scale(1.2);
       cursor: pointer;
     }
 
@@ -154,7 +153,7 @@
       background-color: #143d78;
     }
 
-    #modal-editar, #modal-cadastro {
+    #modal-editar {
       display: none;
       position: fixed;
       top: 0; left: 0;
@@ -165,7 +164,7 @@
       z-index: 9999;
     }
 
-    .modal-conteudo {
+    #modal-editar .modal-conteudo {
       background: white;
       padding: 30px;
       border-radius: 12px;
@@ -180,15 +179,15 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .modal-conteudo h3 {
+    #modal-editar h3 {
       margin-top: 0;
       font-size: 1.4rem;
       color: #175197;
       margin-bottom: 15px;
     }
 
-    .modal-conteudo input,
-    .modal-conteudo select {
+    #modal-editar input,
+    #modal-editar select {
       width: 100%;
       padding: 10px;
       margin-bottom: 12px;
@@ -197,7 +196,7 @@
       font-size: 1rem;
     }
 
-    .modal-conteudo button {
+    #modal-editar button {
       padding: 10px 15px;
       border: none;
       border-radius: 6px;
@@ -205,12 +204,12 @@
       cursor: pointer;
     }
 
-    .modal-conteudo button:first-of-type {
+    #modal-editar button:first-of-type {
       background-color: #6c757d;
       color: white;
     }
 
-    .modal-conteudo button:last-of-type {
+    #modal-editar button:last-of-type {
       background-color: #28a745;
       color: white;
       margin-left: 10px;
@@ -221,15 +220,12 @@
   <h1>Lista de Clientes</h1>
 
   <div class="filtro-unico">
-    <input type="text" id="filtro-unico" placeholder="Buscar por nome, telefone, servidor ou data (12/07/2025)" oninput="filtrarClientes()">
-  </div>
-
-  <div class="filtro-expirados">
-    <button onclick="filtrarExpirados()">Mostrar apenas vencidos</button>
+    <input type="text" id="filtro-unico" placeholder="Buscar por nome, telefone, servidor ou data" oninput="filtrarClientes()" />
+    <label><input type="checkbox" id="filtro-vencidos" onchange="filtrarClientes()" /> Mostrar apenas vencidos</label>
   </div>
 
   <div class="botoes-topo">
-    <button onclick="abrirModalCadastro()" class="btn-voltar">Cadastrar</button>
+    <a href="index.html" class="btn-voltar">Cadastro</a>
     <button onclick="logout()" class="btn-logout">Logout</button>
   </div>
 
@@ -253,9 +249,199 @@
     <button onclick="proximaPagina()">Próximo</button>
   </div>
 
-  <div id="modal-editar" class="modal"></div>
-  <div id="modal-cadastro" class="modal"></div>
+  <!-- Modal de Edição -->
+  <div id="modal-editar">
+    <div class="modal-conteudo">
+      <h3>Editar Cliente</h3>
+      <input type="hidden" id="editar-id" />
+      <label>Nome:</label>
+      <input type="text" id="editar-nome" />
+      <label>Telefone:</label>
+      <input type="text" id="editar-telefone" />
+      <label>Lista:</label>
+      <input type="text" id="editar-lista" />
+      <label>Servidor:</label>
+      <select id="editar-servidor">
+        <option value="NOW">NOW</option>
+        <option value="STREAMLY">STREAMLY</option>
+        <option value="NEXT">NEXT</option>
+        <option value="BLADE">BLADE</option>
+        <option value="TOP">TOP</option>
+        <option value="UNITV">UNITV</option>
+      </select>
+      <label>Vencimento:</label>
+      <input type="date" id="editar-vencimento" />
+      <div style="text-align: right; margin-top: 10px;">
+        <button onclick="fecharModal()">Cancelar</button>
+        <button onclick="salvarEdicao()">Salvar</button>
+      </div>
+    </div>
+  </div>
 
-  <!-- JS: Inclua seu script com Supabase aqui -->
+  <script src="https://unpkg.com/@supabase/supabase-js"></script>
+  <script>
+    const supabase = window.supabase.createClient(
+      'https://mrmfxzojroxyqaelsraj.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ybWZ4em9qcm94eXFhZWxzcmFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIyNzEyNTEsImV4cCI6MjA2Nzg0NzI1MX0.TRSmNcf7Cxo11UQx1Jvo4LOU5yE38f8NCMXEf927KsM'
+    );
+
+    let todosClientes = [];
+    let clientesFiltrados = [];
+    let paginaAtual = 1;
+    const porPagina = 10;
+
+    async function carregarClientes() {
+      const { data, error } = await supabase.from('clientes').select('*');
+      if (error) {
+        alert('Erro ao buscar clientes: ' + error.message);
+        return;
+      }
+      todosClientes = data;
+      filtrarClientes();
+    }
+
+    function isExpirado(vencimento) {
+      const hoje = new Date();
+      const data = new Date(vencimento + 'T00:00:00');
+      return data < hoje;
+    }
+
+    function formatarData(data) {
+      const [ano, mes, dia] = data.split('-');
+      return `${dia}/${mes}/${ano}`;
+    }
+
+    function filtrarClientes() {
+      const termo = document.getElementById('filtro-unico').value.trim().toLowerCase();
+      const mostrarVencidos = document.getElementById('filtro-vencidos').checked;
+
+      clientesFiltrados = todosClientes.filter(cliente => {
+        const vencBR = formatarData(cliente.vencimento).toLowerCase();
+        const ehVencido = isExpirado(cliente.vencimento);
+
+        const corresponde =
+          cliente.nome.toLowerCase().includes(termo) ||
+          cliente.telefone.toLowerCase().includes(termo) ||
+          cliente.lista.toLowerCase().includes(termo) ||
+          cliente.servidor.toLowerCase().includes(termo) ||
+          vencBR.includes(termo);
+
+        return corresponde && (!mostrarVencidos || ehVencido);
+      });
+
+      paginaAtual = 1;
+      renderClientes();
+    }
+
+    function renderClientes() {
+      const tabela = document.getElementById('tabela-clientes');
+      tabela.innerHTML = '';
+
+      const inicio = (paginaAtual - 1) * porPagina;
+      const fim = inicio + porPagina;
+      const clientesPagina = clientesFiltrados.slice(inicio, fim);
+
+      clientesPagina.forEach(cliente => {
+        const linha = document.createElement('tr');
+        if (isExpirado(cliente.vencimento)) linha.classList.add('expirado');
+
+        linha.innerHTML = `
+          <td>${cliente.nome}</td>
+          <td>${cliente.telefone}</td>
+          <td>${cliente.lista}</td>
+          <td>${cliente.servidor}</td>
+          <td>${formatarData(cliente.vencimento)}</td>
+          <td class="botoes">
+            <button class="editar" onclick="abrirModal('${cliente.id}')">Editar</button>
+            <button class="deletar" onclick="deletar('${cliente.id}')">Deletar</button>
+          </td>
+        `;
+        tabela.appendChild(linha);
+      });
+
+      atualizarPaginacao();
+    }
+
+    function atualizarPaginacao() {
+      const totalPaginas = Math.ceil(clientesFiltrados.length / porPagina);
+      document.getElementById('indicador-pagina').textContent = `Página ${paginaAtual} de ${totalPaginas}`;
+    }
+
+    function paginaAnterior() {
+      if (paginaAtual > 1) {
+        paginaAtual--;
+        renderClientes();
+      }
+    }
+
+    function proximaPagina() {
+      const totalPaginas = Math.ceil(clientesFiltrados.length / porPagina);
+      if (paginaAtual < totalPaginas) {
+        paginaAtual++;
+        renderClientes();
+      }
+    }
+
+    async function deletar(id) {
+      if (confirm('Tem certeza que deseja deletar este cliente?')) {
+        const { error } = await supabase.from('clientes').delete().eq('id', id);
+        if (error) {
+          alert('Erro ao deletar: ' + error.message);
+        } else {
+          alert('Cliente deletado com sucesso!');
+          carregarClientes();
+        }
+      }
+    }
+
+    function abrirModal(id) {
+      const cliente = todosClientes.find(c => c.id === id);
+      if (!cliente) return;
+
+      const [ano, mes, dia] = cliente.vencimento.split('-');
+      document.getElementById('editar-id').value = cliente.id;
+      document.getElementById('editar-nome').value = cliente.nome;
+      document.getElementById('editar-telefone').value = cliente.telefone;
+      document.getElementById('editar-lista').value = cliente.lista;
+      document.getElementById('editar-servidor').value = cliente.servidor;
+      document.getElementById('editar-vencimento').value = `${ano}-${mes}-${dia}`;
+      document.getElementById('modal-editar').style.display = 'flex';
+    }
+
+    function fecharModal() {
+      document.getElementById('modal-editar').style.display = 'none';
+    }
+
+    async function salvarEdicao() {
+      const id = document.getElementById('editar-id').value;
+      const clienteAtualizado = {
+        nome: document.getElementById('editar-nome').value,
+        telefone: document.getElementById('editar-telefone').value,
+        lista: document.getElementById('editar-lista').value,
+        servidor: document.getElementById('editar-servidor').value,
+        vencimento: document.getElementById('editar-vencimento').value
+      };
+      const { error } = await supabase.from('clientes').update(clienteAtualizado).eq('id', id);
+      if (error) {
+        alert('Erro ao salvar: ' + error.message);
+      } else {
+        alert('Cliente atualizado com sucesso!');
+        fecharModal();
+        carregarClientes();
+      }
+    }
+
+    async function logout() {
+      await supabase.auth.signOut();
+      window.location.href = 'login.html';
+    }
+
+    (async () => {
+      const { data } = await supabase.auth.getUser();
+      if (!data.user) window.location.href = 'login.html';
+    })();
+
+    carregarClientes();
+  </script>
 </body>
 </html>
