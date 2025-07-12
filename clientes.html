@@ -25,16 +25,23 @@
     .filtro-unico {
       display: flex;
       justify-content: center;
-      margin-bottom: 1.5rem;
+      margin-bottom: 2rem;
     }
 
     .filtro-unico input {
       width: 100%;
       max-width: 400px;
-      padding: 0.6rem;
+      padding: 0.6rem 1rem;
       font-size: 1rem;
-      border: 1px solid #ccc;
+      border: none;
       border-radius: 8px;
+      background-color: white;
+      box-shadow: 0 0 0 1px #ccc inset;
+      transition: box-shadow 0.2s;
+    }
+
+    .filtro-unico input:focus {
+      box-shadow: 0 0 0 2px #175197 inset;
       outline: none;
     }
 
@@ -42,43 +49,56 @@
       width: 100%;
       border-collapse: collapse;
       background-color: white;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      border-radius: 8px;
+      border-radius: 12px;
       overflow: hidden;
     }
 
-    th, td {
-      padding: 0.9rem;
-      text-align: left;
-      border-bottom: 1px solid #eee;
-    }
-
-    th {
+    thead {
       background-color: #175197;
       color: white;
+    }
+
+    th, td {
+      padding: 1rem;
+      text-align: left;
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: #f9fbfd;
+    }
+
+    tbody tr:nth-child(odd) {
+      background-color: #ffffff;
     }
 
     td input,
     td select {
       width: 100%;
-      padding: 0.4rem;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+      padding: 0.4rem 0.6rem;
       font-size: 0.95rem;
-      background-color: #f9f9f9;
+      border: none;
+      background-color: transparent;
+      border-radius: 6px;
+      transition: background-color 0.2s;
+    }
+
+    td input:focus,
+    td select:focus {
+      background-color: #e6f0fa;
+      outline: none;
     }
 
     .botoes {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
     }
 
     button {
       padding: 0.4rem 0.8rem;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       border: none;
-      border-radius: 4px;
+      border-radius: 6px;
       cursor: pointer;
       transition: background-color 0.2s;
     }
@@ -114,8 +134,8 @@
         margin-bottom: 1.5rem;
         padding: 1rem;
         background-color: white;
-        border: 1px solid #ddd;
         border-radius: 8px;
+        box-shadow: 0 0 4px rgba(0,0,0,0.1);
       }
 
       td {
