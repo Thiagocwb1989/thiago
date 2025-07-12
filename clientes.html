@@ -69,41 +69,96 @@
 
     .salvar {
       background-color: #28a745;
-      color: white;
-    }
+      color: white<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #eef2f5;
+    padding: 2rem;
+  }
 
-    .deletar {
-      background-color: #dc3545;
-      color: white;
-    }
+  h1 {
+    text-align: center;
+    color: #175197;
+    margin-bottom: 1.5rem;
+  }
 
-    button:hover {
-      opacity: 0.9;
-    }
+  .filtro-unico {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+  }
 
-    tr:nth-child(even) {
-      background-color: #f9f9f9;
-    }
+  .filtro-unico input {
+    width: 400px;
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
 
-    #paginacao {
-      display: flex;
-      justify-content: center;
-      margin-top: 1.5rem;
-      gap: 10px;
-      font-weight: bold;
-    }
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 1rem; /* Espaço entre as linhas */
+  }
 
-    #paginacao button {
-      background-color: #175197;
-      color: white;
-      padding: 0.4rem 0.8rem;
-    }
+  th {
+    background-color: #175197;
+    color: white;
+    padding: 0.75rem;
+    text-align: left;
+  }
 
-    #paginacao button:disabled {
-      background-color: #999;
-      cursor: not-allowed;
-    }
-  </style>
+  td {
+    background-color: #fff;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  }
+
+  td input, td select {
+    width: 100%;
+    padding: 0.5rem;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    background: transparent;
+    font-size: 1rem;
+  }
+
+  td input:focus, td select:focus {
+    outline: none;
+    border-bottom: 1px solid #175197;
+  }
+
+  .botoes {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 0.5rem;
+  }
+
+  button {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .salvar {
+    background-color: #28a745;
+    color: white;
+  }
+
+  .deletar {
+    background-color: #dc3545;
+    color: white;
+  }
+
+  button:hover {
+    opacity: 0.9;
+  }
+</style>
 </head>
 <body>
   <h1>Lista de Clientes</h1>
