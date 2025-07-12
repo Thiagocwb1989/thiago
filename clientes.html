@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Clientes - PoupyAI</title>
   <style>
     body {
@@ -59,15 +59,22 @@
     .cliente button:hover {
       background-color: #143d78;
     }
+
+    #mensagem {
+      text-align: center;
+      color: #888;
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
   <h1>Clientes Cadastrados</h1>
 
   <div id="filtro">
-    <input type="text" id="filtroNome" placeholder="Filtrar por nome...">
+    <input type="text" id="filtroNome" placeholder="Filtrar por nome..." />
   </div>
 
+  <div id="mensagem"></div>
   <div id="listaClientes"></div>
 
   <script src="https://unpkg.com/@supabase/supabase-js"></script>
@@ -79,8 +86,12 @@
 
     const lista = document.getElementById('listaClientes');
     const filtroNome = document.getElementById('filtroNome');
+    const mensagem = document.getElementById('mensagem');
 
     async function carregarClientes(filtro = '') {
+      mensagem.textContent = 'Carregando...';
+      lista.innerHTML = '';
+
       let query = supabase.from('clientes').select('*');
 
       if (filtro) {
@@ -89,23 +100,28 @@
 
       const { data, error } = await query;
 
-      lista.innerHTML = '';
-
       if (error) {
-        lista.innerHTML = 'Erro ao carregar clientes.';
+        mensagem.textContent = 'Erro ao carregar: ' + error.message;
         return;
       }
 
-      data.forEach(cliente => {
+      if (!data || data.length === 0) {
+        mensagem.textContent = 'Nenhum cliente encontrado.';
+        return;
+      }
+
+      mensagem.textContent = '';
+
+      data.forEach((cliente) => {
         const div = document.createElement('div');
         div.className = 'cliente';
         div.innerHTML = `
-          <input type="text" value="${cliente.nome}" id="nome-${cliente.id}">
-          <input type="text" value="${cliente.telefone}" id="telefone-${cliente.id}">
-          <input type="text" value="${cliente.lista}" id="lista-${cliente.id}">
-          <input type="text" value="${cliente.servidor}" id="servidor-${cliente.id}">
-          <input type="date" value="${cliente.vencimento}" id="vencimento-${cliente.id}">
-          <button onclick="salvar(${cliente.id})">Salvar Alterações</button>
+          <input type="text" value="${cliente.nome}" id="nome-${cliente.id}" />
+          <input type="text" value="${cliente.telefone}" id="telefone-${cliente.id}" />
+          <input type="text" value="${cliente.lista}" id="lista-${cliente.id}" />
+          <input type="text" value="${cliente.servidor}" id="servidor-${cliente.id}" />
+          <input type="date" value="${cliente.vencimento}" id="vencimento-${cliente.id}" />
+          <button onclick="salvar(${cliente.id})">Salvar</button>
         `;
         lista.appendChild(div);
       });
@@ -114,19 +130,19 @@
     async function salvar(id) {
       const nome = document.getElementById(`nome-${id}`).value;
       const telefone = document.getElementById(`telefone-${id}`).value;
-      const lista = document.getElementById(`lista-${id}`).value;
+      const listaValor = document.getElementById(`lista-${id}`).value;
       const servidor = document.getElementById(`servidor-${id}`).value;
       const vencimento = document.getElementById(`vencimento-${id}`).value;
 
       const { error } = await supabase
         .from('clientes')
-        .update({ nome, telefone, lista, servidor, vencimento })
+        .update({ nome, telefone, lista: listaValor, servidor, vencimento })
         .eq('id', id);
 
       if (error) {
         alert('Erro ao salvar: ' + error.message);
       } else {
-        alert('Alterações salvas com sucesso!');
+        alert('Cliente atualizado com sucesso!');
         carregarClientes(filtroNome.value);
       }
     }
