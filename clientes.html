@@ -99,6 +99,27 @@
     cursor: pointer;
     font-size: 0.85rem;
   }
+  
+  .paginacao {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 15px; /* Espaço entre os botões */
+}
+
+.paginacao button {
+  padding: 0.5rem 1rem;
+  background-color: #175197;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.paginacao button:hover {
+  background-color: #143d78;
+}
+
 
   .deletar {
     background-color: #dc3545;
@@ -140,12 +161,11 @@
       <!-- Clientes aqui -->
     </tbody>
   </table>
-
-  <div id="paginacao">
-    <button onclick="paginaAnterior()" id="btn-anterior">Anterior</button>
-    <span id="indicador-pagina">Página 1</span>
-    <button onclick="proximaPagina()" id="btn-proximo">Próximo</button>
-  </div>
+<div class="paginacao">
+  <button onclick="paginaAnterior()">Anterior</button>
+      <span id="indicador-pagina">Página 1</span>
+  <button onclick="proximaPagina()">Próximo</button>
+</div>
 
   <script src="https://unpkg.com/@supabase/supabase-js"></script>
   <script>
